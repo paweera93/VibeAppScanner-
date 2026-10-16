@@ -1,10 +1,10 @@
 {
-  "name": "app-safety-scan",
+  "name": "leakpatrol",
   "version": "0.1.0",
   "description": "Read-only security scanner for vibe-coded web apps (Lovable, Bolt, v0, Replit, Cursor).",
   "type": "module",
   "bin": {
-    "app-safety-scan": "src/cli.js"
+    "leakpatrol": "src/cli.js"
   },
   "scripts": {
     "scan": "node src/cli.js",

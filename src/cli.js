@@ -9,7 +9,7 @@ const allowPrivate = args.includes('--allow-private');
 const target = args.find((a) => !a.startsWith('--'));
 
 if (!target) {
-  console.error('Usage: app-safety-scan <url> [--json]');
+  console.error('Usage: leakpatrol <url> [--json]');
   process.exit(2);
 }
 
@@ -31,7 +31,7 @@ function printReport(r) {
     console.log(`Could not reach ${r.target}: ${r.error}`);
     return;
   }
-  console.log(`\nApp Safety Scan: ${r.finalUrl}`);
+  console.log(`\nLeakPatrol: ${r.finalUrl}`);
   console.log(`Score: ${r.score.value}/100 (grade ${r.score.grade})`);
   console.log(`Scripts scanned: ${r.scriptsScanned}${r.usesSupabase ? ' · uses Supabase' : ''}`);
   console.log(SEVERITY_ORDER.map((s) => `${s}: ${r.summary[s]}`).join('  '));

@@ -1,4 +1,4 @@
-# App Safety Scan
+# LeakPatrol
 
 A read-only security scanner for apps built with Lovable, Bolt, v0, Replit and Cursor.
 Give it a URL and it reports leaked secrets, Supabase misconfiguration, missing
