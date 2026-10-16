@@ -5,6 +5,14 @@ const statusEl = document.getElementById('status');
 const results = document.getElementById('results');
 
 let lastScannedUrl = '';
+let progressTimer;
+const PROGRESS = [
+  'Loading your app…',
+  'Reading your JavaScript for leaked keys…',
+  'Checking for public .env and .git files…',
+  'Checking security headers…',
+  'Almost done…',
+];
 const LABELS = { critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low', info: 'Info' };
 
 form.addEventListener('submit', async (e) => {
@@ -16,7 +24,7 @@ form.addEventListener('submit', async (e) => {
   }
   button.disabled = true;
   results.hidden = true;
-  showStatus('Scanning… this usually takes under a minute.');
+  startProgress();
   try {
     const res = await fetch('/api/scan', {
       method: 'POST',
@@ -29,6 +37,7 @@ form.addEventListener('submit', async (e) => {
     } else if (!data.reachable) {
       showStatus('We could not reach that site. Check the address and that the site is online.', 'error');
     } else {
+      clearInterval(progressTimer);
       statusEl.hidden = true;
       lastScannedUrl = url;
       render(data);
@@ -40,7 +49,18 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+function startProgress() {
+  let step = 0;
+  showStatus(PROGRESS[0], 'loading');
+  statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  progressTimer = setInterval(() => {
+    step = Math.min(step + 1, PROGRESS.length - 1);
+    statusEl.textContent = PROGRESS[step];
+  }, 4000);
+}
+
 function showStatus(text, kind = 'info') {
+  clearInterval(progressTimer);
   statusEl.textContent = text;
   statusEl.className = `status ${kind}`;
   statusEl.hidden = false;
@@ -107,6 +127,23 @@ document.getElementById('buy-button').addEventListener('click', async (e) => {
   }
   btn.disabled = false;
 });
+
+// "Scan for free" links lower down the page jump back to the form and put the cursor in it.
+for (const link of document.querySelectorAll('a[href="#scan-form"]')) {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input.focus({ preventScroll: true });
+  });
+}
+
+// The pricing card says "Coming soon" until checkout is switched on.
+fetch('/api/config')
+  .then((r) => r.json())
+  .then((c) => {
+    if (c.checkoutAvailable) document.getElementById('pricing-soon').hidden = true;
+  })
+  .catch(() => {});
 
 const waitlistForm = document.getElementById('waitlist-form');
 const waitlistStatus = document.getElementById('waitlist-status');

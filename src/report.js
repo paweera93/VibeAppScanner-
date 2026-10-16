@@ -40,6 +40,7 @@ export function toFullReport(report) {
     score: report.score,
     summary: report.summary,
     usesSupabase: report.usesSupabase,
+    deep: Boolean(report.deep),
     scriptsScanned: report.scriptsScanned,
     findings: report.findings.map(({ id, severity, category, title, detail, evidence, fix }) => ({
       id, severity, category, title, detail, evidence, fix, prompt: promptFor({ id, category, title }),

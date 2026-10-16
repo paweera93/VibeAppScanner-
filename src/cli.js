@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Usage: node src/cli.js <url> [--json] [--full]
+// Usage: node src/cli.js <url> [--json] [--full] [--deep]
 // --full prints the paid report as Markdown, with a copy-paste AI prompt for each fix.
+// --deep adds the Supabase database checks. Only use it on sites you own.
 
 import { scan, SEVERITY_ORDER } from './scan.js';
 import { toFullReport, renderMarkdown } from './report.js';
@@ -9,15 +10,16 @@ const args = process.argv.slice(2);
 const json = args.includes('--json');
 const full = args.includes('--full');
 const allowPrivate = args.includes('--allow-private');
+const deep = args.includes('--deep');
 const target = args.find((a) => !a.startsWith('--'));
 
 if (!target) {
-  console.error('Usage: leakpatrol <url> [--json] [--full]');
+  console.error('Usage: leakpatrol <url> [--json] [--full] [--deep]');
   process.exit(2);
 }
 
 try {
-  const report = await scan(target, { allowPrivate });
+  const report = await scan(target, { allowPrivate, deep });
   if (full) {
     process.stdout.write(renderMarkdown(toFullReport(report)));
   } else if (json) {

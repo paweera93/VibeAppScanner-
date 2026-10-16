@@ -9,7 +9,12 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="/">LeakPatrol</a></header>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/#pricing">Pricing</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
   <main>
     <section id="status" class="status" aria-live="polite">Loading your report…</section>
 
@@ -24,6 +29,23 @@
       <ul id="counts" class="counts"></ul>
       <p class="fine-print">Bookmark this page. It re-checks your site each time you open it (at most every 10 minutes), so you can watch your grade go up as you fix things. <a id="download" href="#">Download as Markdown</a></p>
 
+      <div id="verify-block" class="unlock" hidden>
+        <h3>Unlock the database check</h3>
+        <p>Your app uses Supabase. Prove you own this site and we will also check which of your tables anyone can read without logging in. This is the most common serious leak in AI-built apps. We read at most one row per table, keep only the column names, and never change anything.</p>
+        <p>Do <strong>one</strong> of these, publish your site, then press the button:</p>
+        <ol class="verify-steps">
+          <li><strong>Easiest:</strong> add this tag inside <code>&lt;head&gt;</code> in <code>index.html</code>. In Lovable or Bolt, paste the prompt below.
+            <pre id="verify-meta" class="prompt"></pre>
+            <button type="button" class="copy" data-target="verify-meta-prompt">Copy prompt</button>
+            <pre id="verify-meta-prompt" hidden></pre>
+          </li>
+          <li>Or upload a file named <code id="verify-file-path"></code> containing only <code id="verify-file-token"></code> (in most projects it goes in the <code>public/</code> folder).</li>
+          <li>Or add a DNS TXT record on <code id="verify-dns-name"></code> with the value <code id="verify-dns-value"></code>.</li>
+        </ol>
+        <button type="button" id="verify-button" class="buy">Check now</button>
+        <p id="verify-status" class="muted" aria-live="polite"></p>
+      </div>
+
       <h2>Fix these, top first</h2>
       <p class="muted">Paste each prompt into Lovable, Bolt, v0, Cursor or Claude Code. Rotate any leaked key yourself in that service's dashboard.</p>
       <ol id="findings" class="findings"></ol>
@@ -35,7 +57,10 @@
       </div>
     </section>
   </main>
-  <footer class="site-footer"><a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@getleakpatrol.com">Contact</a></footer>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
   <script src="/report.js" type="module"></script>
 </body>
 </html>

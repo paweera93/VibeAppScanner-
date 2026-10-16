@@ -6,7 +6,7 @@ export const USER_AGENT =
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
 
-export async function get(url, { timeoutMs = DEFAULT_TIMEOUT_MS, maxBytes = DEFAULT_MAX_BYTES, redirect = 'follow' } = {}) {
+export async function get(url, { timeoutMs = DEFAULT_TIMEOUT_MS, maxBytes = DEFAULT_MAX_BYTES, redirect = 'follow', headers = {} } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -14,7 +14,7 @@ export async function get(url, { timeoutMs = DEFAULT_TIMEOUT_MS, maxBytes = DEFA
       method: 'GET',
       redirect,
       signal: controller.signal,
-      headers: { 'user-agent': USER_AGENT, accept: '*/*' },
+      headers: { 'user-agent': USER_AGENT, accept: '*/*', ...headers },
     });
     const body = await readCapped(res, maxBytes);
     return {

@@ -28,6 +28,7 @@ async function load(attempt = 0) {
     }
     statusEl.hidden = true;
     render(data.report);
+    renderVerification(data.report, data.verification);
   } catch {
     statusEl.textContent = 'Something went wrong. Please refresh the page.';
   }
@@ -68,6 +69,42 @@ function render(r) {
   }
   document.getElementById('results').hidden = false;
 }
+
+function renderVerification(r, v) {
+  const block = document.getElementById('verify-block');
+  block.hidden = !r.usesSupabase || !v || v.verified;
+  if (block.hidden) return;
+  document.getElementById('verify-meta').textContent = v.meta;
+  document.getElementById('verify-meta-prompt').textContent =
+    `Add this exact tag inside the <head> of index.html, directly in the HTML file (not added by React or JavaScript), then publish:\n${v.meta}`;
+  document.getElementById('verify-file-path').textContent = v.filePath;
+  document.getElementById('verify-file-token').textContent = v.token;
+  document.getElementById('verify-dns-name').textContent = v.dnsName;
+  document.getElementById('verify-dns-value').textContent = v.dnsValue;
+}
+
+document.getElementById('verify-button').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  const out = document.getElementById('verify-status');
+  btn.disabled = true;
+  out.textContent = 'Checking your site…';
+  try {
+    const res = await fetch('/api/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id }) });
+    const data = await res.json();
+    if (data.verified) {
+      out.textContent = 'Verified. Running the database check…';
+      document.getElementById('results').hidden = true;
+      statusEl.hidden = false;
+      statusEl.textContent = 'Checking your database…';
+      await load();
+      return;
+    }
+    out.textContent = data.error || 'Not verified yet.';
+  } catch {
+    out.textContent = 'Something went wrong. Please try again.';
+  }
+  btn.disabled = false;
+});
 
 document.addEventListener('click', async (e) => {
   const btn = e.target.closest('button.copy');

@@ -8,7 +8,12 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="/">LeakPatrol</a></header>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/#pricing">Pricing</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
   <main class="prose">
     <h1>Privacy</h1>
     <p><em>Draft, to be reviewed before launch.</em></p>
@@ -16,8 +21,12 @@
     <p>We keep scan results for up to 10 minutes so repeated scans of the same site are fast. Any secret we find is masked before it is shown, and we never store the full value.</p>
     <p>If you join the waitlist we store your email address and the date you signed up. We use it only to tell you when full reports launch. To be removed, email privacy@getleakpatrol.com and we will delete it. The list is stored in Google Cloud in Europe.</p>
     <p>If you buy a full report, Lemon Squeezy processes your payment. We never see your card details. We receive and keep your email address, order number and the site the report is for, so we can show you the report and help if something goes wrong.</p>
+    <p>If you verify that you own your site, we also check your Supabase database the way any visitor could, using the public key in your site's code. We read at most one row from each table to learn its column names, and we never store or show what is in your rows.</p>
     <p>We do not use advertising or tracking cookies.</p>
   </main>
-  <footer class="site-footer"><a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@getleakpatrol.com">Contact</a></footer>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
 </body>
 </html>

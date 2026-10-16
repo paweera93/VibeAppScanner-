@@ -8,6 +8,7 @@
   <link rel="canonical" href="https://getleakpatrol.com/">
   <link rel="stylesheet" href="/styles.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#0d1020">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="LeakPatrol">
   <meta property="og:url" content="https://getleakpatrol.com/">
@@ -17,74 +18,216 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://getleakpatrol.com/og-image.png">
 </head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="/">LeakPatrol</a>
-  </header>
+<body class="home">
+  <div class="hero-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav">
+        <a href="#how">How it works</a>
+        <a href="#checks">What we check</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/about.html">About</a>
+      </nav>
+    </header>
 
-  <main>
-    <section class="hero">
-      <h1>Is your vibe-coded app safe?</h1>
-      <p class="lead">Paste your app's address. In about a minute we check for leaked API keys, exposed Supabase keys, public <code>.env</code> files and missing security headers. Built for apps made with Lovable, Bolt, v0, Replit and Cursor.</p>
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Free security check for AI-built apps</p>
+        <h1>Is your vibe-coded app <span class="accent">leaking secrets?</span></h1>
+        <p class="lead">Paste your app's address. In about a minute you get a grade from A to F and a plain-English list of leaked keys, open databases and missing protections.</p>
 
-      <form id="scan-form" class="scan-form" novalidate>
-        <label for="url" class="visually-hidden">Your app's address</label>
-        <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="myapp.lovable.app" required>
-        <button type="submit" id="scan-button">Scan for free</button>
-      </form>
-      <p class="fine-print">Read-only and safe: we only look at what any visitor's browser already downloads. Only scan apps you own or have permission to test.</p>
-    </section>
-
-    <section id="status" class="status" hidden aria-live="polite"></section>
-
-    <section id="results" class="results" hidden>
-      <div class="score-card">
-        <div id="grade" class="grade">?</div>
-        <div>
-          <p class="score-line"><span id="score">0</span>/100</p>
-          <p id="scanned-url" class="muted"></p>
-        </div>
-      </div>
-      <ul id="counts" class="counts"></ul>
-
-      <h2>What we found</h2>
-      <ol id="issues" class="issues"></ol>
-
-      <div id="preview" class="preview"></div>
-
-      <div id="unlock" class="unlock" hidden>
-        <h3>Get every fix</h3>
-        <p>The full report explains each problem in plain English and gives you a copy-paste prompt to fix it in Lovable, Bolt, Cursor or Claude Code. <span id="locked-count"></span></p>
-        <div id="buy-block" hidden>
-          <button type="button" id="buy-button" class="buy">Get the full report · £9</button>
-          <p class="fine-print">One-off payment, no subscription. Secure checkout by Lemon Squeezy. Your report re-checks your site whenever you open it.</p>
-        </div>
-        <div id="waitlist-block">
-        <p>Full reports are coming soon. Leave your email and we'll tell you when they're ready.</p>
-        <form id="waitlist-form" class="scan-form" novalidate>
-          <label for="email" class="visually-hidden">Your email</label>
-          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-          <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button type="submit" id="waitlist-button">Notify me</button>
+        <form id="scan-form" class="scan-form hero-form" novalidate>
+          <label for="url" class="visually-hidden">Your app's address</label>
+          <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="myapp.lovable.app" required>
+          <button type="submit" id="scan-button">Scan for free</button>
         </form>
-        <p id="waitlist-status" class="fine-print" aria-live="polite">One email when full reports launch, nothing else. Unsubscribe any time.</p>
+        <ul class="trust">
+          <li>Read-only</li>
+          <li>No sign-up</li>
+          <li>Results in about a minute</li>
+        </ul>
+        <p class="works-with">Works with apps from <span>Lovable</span> <span>Bolt</span> <span>v0</span> <span>Replit</span> <span>Cursor</span></p>
+      </div>
+
+      <div class="sample" aria-label="Example report">
+        <p class="sample-label">Example report</p>
+        <div class="sample-head">
+          <div class="grade grade-f">F</div>
+          <div>
+            <p class="score-line">22<span>/100</span></p>
+            <p class="sample-url">my-startup.lovable.app</p>
+          </div>
+        </div>
+        <ul class="sample-issues">
+          <li><span class="badge sev-critical">Critical</span> Supabase service key is visible in your JavaScript</li>
+          <li><span class="badge sev-critical">Critical</span> Anyone can read your "profiles" table without logging in</li>
+          <li><span class="badge sev-critical">Critical</span> Your .env file is public</li>
+          <li><span class="badge sev-critical">Critical</span> OpenAI API key is visible in your JavaScript</li>
+          <li><span class="badge sev-medium">Medium</span> No Content-Security-Policy header</li>
+        </ul>
+        <div class="sample-fix">
+          <p class="sample-fix-title">Paste into Lovable to fix</p>
+          <p>Remove the Supabase service key from all front-end code. Make the browser client use only the anon key…</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <main class="landing">
+    <div class="wrap narrow">
+      <section id="status" class="status" hidden aria-live="polite"></section>
+
+      <section id="results" class="results" hidden>
+        <div class="score-card">
+          <div id="grade" class="grade">?</div>
+          <div>
+            <p class="score-line"><span id="score">0</span><span>/100</span></p>
+            <p id="scanned-url" class="muted"></p>
+          </div>
+        </div>
+        <ul id="counts" class="counts"></ul>
+
+        <h2>What we found</h2>
+        <ol id="issues" class="issues"></ol>
+
+        <div id="preview" class="preview"></div>
+
+        <div id="unlock" class="unlock" hidden>
+          <h3>Get every fix</h3>
+          <p>The full report explains each problem in plain English and gives you a copy-paste prompt to fix it in Lovable, Bolt, Cursor or Claude Code. <span id="locked-count"></span></p>
+          <div id="buy-block" hidden>
+            <button type="button" id="buy-button" class="buy">Get the full report · £9</button>
+            <p class="fine-print">One-off payment, no subscription. Secure checkout by Lemon Squeezy. Your report re-checks your site whenever you open it.</p>
+          </div>
+          <div id="waitlist-block">
+            <p>Full reports are coming soon. Leave your email and we'll tell you when they're ready.</p>
+            <form id="waitlist-form" class="scan-form" novalidate>
+              <label for="email" class="visually-hidden">Your email</label>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+              <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <button type="submit" id="waitlist-button">Notify me</button>
+            </form>
+            <p id="waitlist-status" class="fine-print" aria-live="polite">One email when full reports launch, nothing else. Unsubscribe any time.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section id="how" class="section wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>From worried to fixed in three steps</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <h3>Paste your address</h3>
+          <p>Your live app's URL, like <code>myapp.lovable.app</code>. No account, no code access, nothing to install.</p>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <h3>Get your grade</h3>
+          <p>We look at your app the way an attacker's browser would, and list every problem from most to least serious.</p>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <h3>Paste the fixes</h3>
+          <p>Each fix comes with a prompt you paste straight into the AI tool that built your app. Scan again to watch your grade go up.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="checks" class="section wrap">
+      <p class="eyebrow">What we check</p>
+      <h2>The mistakes AI tools make most</h2>
+      <div class="grid">
+        <div class="card">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M16 7l3 3M14 9l2 2"/></svg>
+          <h3>Leaked secrets</h3>
+          <p>OpenAI, Anthropic, Stripe, AWS, GitHub and Supabase service keys hiding in your JavaScript, where anyone can copy them and run up your bill.</p>
+        </div>
+        <div class="card">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+          <h3>Supabase setup</h3>
+          <p>Admin keys shipped to the browser and, once you verify you own the site, which tables anyone can read without logging in.</p>
+        </div>
+        <div class="card">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14h6M9 18h4"/></svg>
+          <h3>Exposed files</h3>
+          <p>Public <code>.env</code> files, <code>.git</code> folders and source maps that hand over your passwords and your code.</p>
+        </div>
+        <div class="card">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+          <h3>Security headers &amp; HTTPS</h3>
+          <p>The browser protections most AI-built apps are missing, with the exact lines to add for your host.</p>
         </div>
       </div>
     </section>
 
-    <section class="how">
-      <h2>What we check</h2>
-      <div class="grid">
-        <div class="card"><h3>Leaked secrets</h3><p>OpenAI, Anthropic, Stripe, AWS, GitHub and Supabase service keys hiding in your JavaScript.</p></div>
-        <div class="card"><h3>Supabase setup</h3><p>Whether you use Supabase, and whether a key that bypasses every security rule has been shipped to the browser.</p></div>
-        <div class="card"><h3>Exposed files</h3><p>Public <code>.env</code> files, <code>.git</code> folders and source maps that give away your code.</p></div>
-        <div class="card"><h3>Security headers</h3><p>The browser protections most AI-built apps are missing, with the exact lines to add.</p></div>
+    <section id="pricing" class="section wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2>Free to check. £9 to fix everything.</h2>
+      <div class="plans">
+        <div class="plan">
+          <h3>Free scan</h3>
+          <p class="price">£0</p>
+          <ul>
+            <li>Your A–F grade and score</li>
+            <li>Every problem we find, by severity</li>
+            <li>One worked example fix</li>
+          </ul>
+          <a class="button ghost" href="#scan-form">Scan for free</a>
+        </div>
+        <div class="plan featured">
+          <h3>Full report <span id="pricing-soon" class="pill">Coming soon</span></h3>
+          <p class="price">£9 <span>one-off</span></p>
+          <ul>
+            <li>Every fix in plain English</li>
+            <li>A copy-paste prompt for your AI tool, for each one</li>
+            <li>Supabase database check for verified owners</li>
+            <li>Re-checks your site every time you open it</li>
+            <li>Download as Markdown</li>
+          </ul>
+          <a class="button" href="#scan-form">Start with a free scan</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section wrap narrow">
+      <p class="eyebrow">Questions</p>
+      <h2>Good to know</h2>
+      <details>
+        <summary>Is it safe to scan my app?</summary>
+        <p>Yes. We only download what any visitor's browser already downloads, plus a short list of files that should never be public. We never log in, submit forms, or change or delete anything.</p>
+      </details>
+      <details>
+        <summary>Do you store my keys or data?</summary>
+        <p>No. If we find a key we show only the first and last few characters, and we never store the full value. Scan results are kept for 10 minutes so repeat scans are quick.</p>
+      </details>
+      <details>
+        <summary>Can I scan someone else's app?</summary>
+        <p>Only scan apps you own or have permission to test. The database check only runs after you prove you own the site.</p>
+      </details>
+      <details>
+        <summary>My app was built with Lovable. Will the fixes work there?</summary>
+        <p>Yes. Each fix in the full report comes with a prompt written for AI coding tools, so you can paste it into Lovable, Bolt, v0, Replit, Cursor or Claude Code.</p>
+      </details>
+      <details>
+        <summary>I got an A. Am I completely safe?</summary>
+        <p>An A means none of the common, visible mistakes we look for. It is not a full security audit, so keep following good practice, especially around who can read and change your data.</p>
+      </details>
+    </section>
+
+    <section class="cta-band">
+      <div class="wrap narrow">
+        <h2>Find out in a minute</h2>
+        <p>Free, read-only, and no sign-up.</p>
+        <a class="button" href="#scan-form">Scan your app</a>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@getleakpatrol.com">Contact</a>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
   </footer>
 
   <script src="/app.js" type="module"></script>

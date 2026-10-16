@@ -10,6 +10,7 @@ security headers and exposed files, each with a plain-English fix.
 node src/cli.js myapp.lovable.app          # human-readable report
 node src/cli.js myapp.lovable.app --json   # JSON for the website/API
 node src/cli.js myapp.lovable.app --full   # full report (Markdown) with AI fix prompts
+node src/cli.js myapp.lovable.app --deep   # add the Supabase database checks (your own sites only)
 node src/server.js                         # website + API on http://localhost:8080
 PAYMENTS_DEMO=1 node src/server.js         # same, with the paid flow unlocked free (local only)
 npm test                                   # runs against built-in broken and clean demo apps
@@ -28,6 +29,12 @@ Paid reports (`POST /api/checkout`, `POST /api/webhooks/lemonsqueezy`, `GET /api
 are off unless `PAYMENTS_ENABLED=1` and `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,
 `LEMONSQUEEZY_VARIANT_ID` and `LEMONSQUEEZY_WEBHOOK_SECRET` are set. The buyer gets a private
 link (`/report.html?id=...`) that re-scans their site each time it's opened.
+
+If the site uses Supabase, the report page offers owner verification (`POST /api/verify`). The owner
+adds a meta tag to `index.html`, a `/leakpatrol-verification.txt` file, or a DNS TXT record, each
+holding a code unique to their report. Once verified, the report also runs the database checks
+(`src/checks/supabase.js`): which tables answer without a login, and whether anyone can sign up
+without confirming an email.
 
 Requires Node 22+. No dependencies.
 
@@ -55,6 +62,7 @@ for e in scan waitlist_signup report_paid; do echo "$e: $(gcloud logging read "j
 | Supabase detection | `src/checks/bundles.js` |
 | Public source maps | `src/checks/bundles.js` |
 | Exposed `.env` and `.git` files | `src/checks/exposed-files.js` |
+| Supabase tables readable without login, open sign-up (verified owners, paid report) | `src/checks/supabase.js` |
 
 ## Safety rules
 
@@ -62,8 +70,11 @@ for e in scan waitlist_signup report_paid; do echo "$e: $(gcloud logging read "j
 - Only same-origin scripts a browser would load anyway, plus a short fixed list of file probes.
 - Local, private and cloud-metadata addresses are refused, including names that resolve to them.
 - Leaked secrets are masked in every report and never stored.
-- Deeper checks (for example reading Supabase tables with the anon key) will only run after the
-  owner verifies the site with a DNS TXT record or a file. Not built yet.
+- Database checks (reading Supabase tables with the public anon key from the site's own
+  JavaScript) only run after the owner verifies the site. They send GET requests to the
+  project's `*.supabase.co` address only, read at most one row per table (40 tables at most),
+  and keep only column names and an estimated row count. Row contents are never stored or shown.
+  Writes are never tested.
 
 ## Roadmap
 
@@ -72,5 +83,5 @@ for e in scan waitlist_signup report_paid; do echo "$e: $(gcloud logging read "j
 3. Hosting: one Cloud Run service for site + API (rate limits built in) ✔
 4. Email waitlist under the locked fixes ✔
 5. Paid report and Lemon Squeezy checkout ✔ (off until switched on)
-6. Owner verification and deep Supabase checks
+6. Owner verification and deep Supabase checks ✔
 7. Launch

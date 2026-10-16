@@ -83,3 +83,7 @@ test('serves the about page and the link preview image', async () => {
   const img = await fetch(apiUrl + '/og-image.png');
   assert.equal(img.headers.get('content-type'), 'image/png');
 });
+
+test('config says whether checkout is on', async () => {
+  assert.deepEqual(await (await fetch(apiUrl + '/api/config')).json(), { checkoutAvailable: false });
+});

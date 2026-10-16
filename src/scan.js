@@ -5,6 +5,7 @@ import { get } from './http.js';
 import { checkHeaders } from './checks/headers.js';
 import { checkBundles } from './checks/bundles.js';
 import { checkExposedFiles } from './checks/exposed-files.js';
+import { checkSupabaseDeep } from './checks/supabase.js';
 
 export const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low', 'info'];
 const SEVERITY_PENALTY = { critical: 30, high: 15, medium: 5, low: 2, info: 0 };
@@ -21,11 +22,11 @@ export function normaliseTarget(input) {
   return url;
 }
 
-export async function scan(input, { allowPrivate = false } = {}) {
+// deep: also run the Supabase database checks. Only for sites whose owner has verified them.
+// supabaseRewrite: tests only, points *.supabase.co at a local fake.
+export async function scan(input, { allowPrivate = false, deep = false, supabaseRewrite } = {}) {
   const target = normaliseTarget(input);
-  if (!allowPrivate && (isPrivateHost(target.hostname) || (await resolvesToPrivate(target.hostname)))) {
-    throw new Error('Refusing to scan a local or private address');
-  }
+  await assertScannable(target.hostname, allowPrivate);
   const startedAt = new Date().toISOString();
 
   const page = await get(target.href);
@@ -44,6 +45,9 @@ export async function scan(input, { allowPrivate = false } = {}) {
   const bundles = await checkBundles(page, { origin });
   findings.push(...bundles.findings);
   findings.push(...(await checkExposedFiles(origin)));
+  if (deep && bundles.supabaseProjects.length) {
+    findings.push(...(await checkSupabaseDeep(bundles.supabaseProjects, { tableHints: bundles.supabaseTables, rewrite: supabaseRewrite })));
+  }
 
   findings.sort((a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity));
 
@@ -56,6 +60,7 @@ export async function scan(input, { allowPrivate = false } = {}) {
     status: page.status,
     scriptsScanned: bundles.scriptsScanned,
     usesSupabase: bundles.supabaseUrls.length > 0,
+    deep,
     summary: summarise(findings),
     score: score(findings),
     findings,
@@ -108,6 +113,12 @@ export function score(findings) {
   value = Math.max(0, value);
   const grade = value >= 90 ? 'A' : value >= 75 ? 'B' : value >= 60 ? 'C' : value >= 40 ? 'D' : 'F';
   return { value, grade };
+}
+
+export async function assertScannable(hostname, allowPrivate = false) {
+  if (!allowPrivate && (isPrivateHost(hostname) || (await resolvesToPrivate(hostname)))) {
+    throw new Error('Refusing to scan a local or private address');
+  }
 }
 
 // A public-looking name can still point at an internal address (SSRF), so check DNS too.

@@ -27,6 +27,22 @@ const PROMPTS = {
     `3. Make sure no table is readable by the anon role unless it is meant to be public, and list any that are.\n` +
     `4. Check storage buckets the same way.\n` +
     `Show me the SQL for each policy before applying it.`,
+  'supabase-table-readable': (f) => {
+    const table = f.title.match(/"([^"]+)"/)?.[1] || 'this table';
+    return (
+      `Anyone can read my Supabase table "${table}" without logging in, using the public anon key. Please:\n` +
+      `1. Enable Row Level Security on "${table}" (ALTER TABLE ... ENABLE ROW LEVEL SECURITY).\n` +
+      `2. Drop any policy on it that uses "true" or lets the anon role read everything.\n` +
+      `3. Add policies so a logged-in user can only read and change their own rows (for example auth.uid() = user_id). ` +
+      `If some rows really are public, make a separate policy or view that exposes only the public columns.\n` +
+      `4. Check every page that reads "${table}" still works when logged in, and shows nothing when logged out.\n` +
+      `Show me the SQL for each policy before applying it.`
+    );
+  },
+  'supabase-open-signup': () =>
+    `In my Supabase project anyone can sign up without confirming their email. Please list every RLS policy that grants access ` +
+    `to the "authenticated" role without also checking auth.uid() against the row's owner, and rewrite each one so users can only ` +
+    `reach their own rows. Then remind me to turn on "Confirm email" in Authentication > Providers > Email.`,
   'exposed-env': () =>
     `My site serves its .env file publicly. Please make sure no .env file is inside the public/ or static folder, ` +
     `add .env* to .gitignore, and add a rule at the host that returns 404 for any path starting with /.env. ` +

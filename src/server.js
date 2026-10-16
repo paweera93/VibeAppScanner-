@@ -11,10 +11,14 @@ import { RateLimiter, TtlCache } from './limits.js';
 import { addToWaitlist, normaliseEmail } from './waitlist.js';
 import { createStore } from './store.js';
 import { paymentsConfig, newReportId, createCheckout, verifySignature, paidOrderFrom, REPORT_ID_RE } from './payments.js';
+import { newVerifyToken, checkOwnership, instructions } from './verify.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
 const ALLOW_PRIVATE = process.env.ALLOW_PRIVATE_TARGETS === '1'; // tests only
+// Tests only: send Supabase API calls to a local fake instead of *.supabase.co.
+const SUPABASE_TEST_BASE = ALLOW_PRIVATE ? process.env.SUPABASE_TEST_BASE : undefined;
+const supabaseRewrite = SUPABASE_TEST_BASE ? () => SUPABASE_TEST_BASE : undefined;
 
 const perVisitor = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }); // 5 scans/hour/IP
 const perDomain = new TtlCache(10 * 60 * 1000); // reuse a domain's result for 10 minutes
@@ -22,6 +26,7 @@ const inFlight = new Map();
 const signupLimit = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 });
 const checkoutLimit = new RateLimiter({ limit: 10, windowMs: 60 * 60 * 1000 });
 const fullScans = new TtlCache(10 * 60 * 1000); // paid reports re-scan at most every 10 minutes
+const verifyLimit = new RateLimiter({ limit: 20, windowMs: 60 * 60 * 1000 });
 const store = createStore();
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain', '.png': 'image/png' };
@@ -42,6 +47,8 @@ export function createServer() {
       if (url.pathname === '/api/checkout' && req.method === 'POST') return await handleCheckout(req, res);
       if (url.pathname === '/api/webhooks/lemonsqueezy' && req.method === 'POST') return await handleWebhook(req, res);
       if (url.pathname === '/api/report' && req.method === 'GET') return await handleReport(url, res);
+      if (url.pathname === '/api/verify' && req.method === 'POST') return await handleVerify(req, res);
+      if (url.pathname === '/api/config' && req.method === 'GET') return sendJson(res, 200, { checkoutAvailable: paymentsConfig().enabled });
       if (url.pathname === '/healthz') return send(res, 200, 'ok', 'text/plain');
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed', 'text/plain');
       return await serveStatic(url, req, res);
@@ -122,10 +129,10 @@ async function handleCheckout(req, res) {
   }
   const reportId = newReportId();
   if (cfg.demo) {
-    await store.create('reports', reportId, { origin: target.origin, status: 'paid', paidAt: new Date(), testMode: true, createdAt: new Date() });
+    await store.create('reports', reportId, { origin: target.origin, status: 'paid', paidAt: new Date(), testMode: true, verifyToken: newVerifyToken(), createdAt: new Date() });
     return sendJson(res, 200, { checkoutUrl: `/report.html?id=${reportId}` });
   }
-  await store.create('reports', reportId, { origin: target.origin, status: 'pending', createdAt: new Date() });
+  await store.create('reports', reportId, { origin: target.origin, status: 'pending', verifyToken: newVerifyToken(), createdAt: new Date() });
   const checkoutUrl = await createCheckout(cfg, { reportId, origin: target.origin });
   console.log(JSON.stringify({ severity: 'INFO', event: 'checkout_created', origin: target.origin }));
   return sendJson(res, 200, { checkoutUrl });
@@ -168,10 +175,13 @@ async function handleReport(url, res) {
   if (record.status !== 'paid') return sendJson(res, 202, { status: 'pending' }, { 'cache-control': 'no-store' });
 
   // Paid reports re-scan the site, so after fixing things the buyer can reload and see the new grade.
-  let full = fullScans.get(record.origin);
+  // Verified owners also get the database checks.
+  const deep = record.verified === true;
+  const cacheKey = `${record.origin}|${deep ? 'deep' : 'basic'}`;
+  let full = fullScans.get(cacheKey);
   if (!full) {
-    full = toFullReport(await scan(record.origin, { allowPrivate: ALLOW_PRIVATE }));
-    if (full.reachable) fullScans.set(record.origin, full);
+    full = toFullReport(await scan(record.origin, { allowPrivate: ALLOW_PRIVATE, deep, supabaseRewrite }));
+    if (full.reachable) fullScans.set(cacheKey, full);
   }
   if (url.searchParams.get('format') === 'md') {
     return send(res, 200, renderMarkdown(full), 'text/markdown; charset=utf-8', {
@@ -179,7 +189,45 @@ async function handleReport(url, res) {
       'content-disposition': 'attachment; filename="leakpatrol-report.md"',
     });
   }
-  return sendJson(res, 200, { status: 'paid', report: full }, { 'cache-control': 'no-store' });
+  let verification = { verified: true, method: record.verifyMethod };
+  if (!deep) {
+    let token = record.verifyToken;
+    if (!token) {
+      token = newVerifyToken(); // reports bought before verification existed
+      await store.update('reports', id, { verifyToken: token });
+    }
+    verification = { verified: false, ...instructions(record.origin, token) };
+  }
+  return sendJson(res, 200, { status: 'paid', report: full, verification }, { 'cache-control': 'no-store' });
+}
+
+async function handleVerify(req, res) {
+  const body = await readJson(req, 1024);
+  const id = String(body?.id || '');
+  if (!REPORT_ID_RE.test(id)) return sendJson(res, 404, { error: 'Report not found.' });
+  const record = await store.get('reports', id);
+  if (!record || record.status !== 'paid') return sendJson(res, 404, { error: 'Report not found.' });
+  if (record.verified) return sendJson(res, 200, { verified: true, method: record.verifyMethod });
+  if (!record.verifyToken) return sendJson(res, 409, { error: 'Reload the report page first.' });
+  if (!verifyLimit.allow(clientIp(req))) {
+    return sendJson(res, 429, { error: 'Too many checks. Please wait a few minutes and try again.' });
+  }
+
+  let method;
+  try {
+    method = await checkOwnership(record.origin, record.verifyToken, { allowPrivate: ALLOW_PRIVATE });
+  } catch (err) {
+    return sendJson(res, 400, { error: err.message });
+  }
+  if (!method) {
+    return sendJson(res, 200, {
+      verified: false,
+      error: 'We could not find your code yet. Make sure the change is published (not just saved in the editor), then try again. DNS changes can take up to an hour.',
+    });
+  }
+  await store.update('reports', id, { verified: true, verifiedAt: new Date(), verifyMethod: method });
+  console.log(JSON.stringify({ severity: 'INFO', event: 'site_verified', origin: record.origin, method }));
+  return sendJson(res, 200, { verified: true, method });
 }
 
 async function serveStatic(url, req, res) {

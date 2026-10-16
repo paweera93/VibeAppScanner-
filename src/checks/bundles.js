@@ -75,7 +75,7 @@ export async function checkBundles(page, { origin }) {
   }
 
   const secretHits = new Map();
-  const supabase = { urls: new Set(), anonKeys: 0, serviceRoleKeys: [], secretKeys: [] };
+  const supabase = { urls: new Set(), anonKeys: new Map(), publishableKeys: new Set(), serviceRoleKeys: [], secretKeys: [], tables: new Set() };
 
   for (const s of scripts) {
     for (const p of SECRET_PATTERNS) {
@@ -86,11 +86,14 @@ export async function checkBundles(page, { origin }) {
     }
     for (const m of s.body.matchAll(/https:\/\/([a-z0-9]{20})\.supabase\.co/g)) supabase.urls.add(m[0]);
     for (const m of s.body.matchAll(/\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g)) {
-      const role = jwtRole(m[0]);
-      if (role === 'anon') supabase.anonKeys++;
+      const { role, ref } = jwtClaims(m[0]);
+      if (role === 'anon') supabase.anonKeys.set(ref, m[0]);
       if (role === 'service_role') supabase.serviceRoleKeys.push({ value: m[0], file: s.url });
     }
     for (const m of s.body.matchAll(/\bsb_secret_[A-Za-z0-9_-]{20,}/g)) supabase.secretKeys.push({ value: m[0], file: s.url });
+    for (const m of s.body.matchAll(/\bsb_publishable_[A-Za-z0-9_-]{20,}/g)) supabase.publishableKeys.add(m[0]);
+    // supabase.from("orders"): the tables the app reads, used by the verified-owner database check.
+    for (const m of s.body.matchAll(/(?<!storage|Array|Buffer)\.from\(\s*["'`]([A-Za-z_]\w{0,62})["'`]\s*\)/g)) supabase.tables.add(m[1]);
   }
 
   for (const { pattern, value, file } of secretHits.values()) {
@@ -126,14 +129,26 @@ export async function checkBundles(page, { origin }) {
     });
   }
 
-  return { findings, scriptsScanned: scripts.length, supabaseUrls: [...supabase.urls] };
+  // The public key for each project: the anon JWT whose ref matches, else a publishable key.
+  const projects = [...supabase.urls].map((url) => {
+    const ref = new URL(url).hostname.split('.')[0];
+    const key = supabase.anonKeys.get(ref) || (supabase.urls.size === 1 ? [...supabase.publishableKeys][0] : undefined);
+    return { url, key };
+  }).filter((p) => p.key);
+
+  return {
+    findings,
+    scriptsScanned: scripts.length,
+    supabaseUrls: [...supabase.urls],
+    supabaseProjects: projects,
+    supabaseTables: [...supabase.tables],
+  };
 }
 
-function jwtRole(jwt) {
+function jwtClaims(jwt) {
   try {
-    const payload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString('utf8'));
-    return payload.role;
+    return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString('utf8')) || {};
   } catch {
-    return null;
+    return {};
   }
 }
