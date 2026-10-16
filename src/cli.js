@@ -1,21 +1,26 @@
 #!/usr/bin/env node
-// Usage: node src/cli.js <url> [--json]
+// Usage: node src/cli.js <url> [--json] [--full]
+// --full prints the paid report as Markdown, with a copy-paste AI prompt for each fix.
 
 import { scan, SEVERITY_ORDER } from './scan.js';
+import { toFullReport, renderMarkdown } from './report.js';
 
 const args = process.argv.slice(2);
 const json = args.includes('--json');
+const full = args.includes('--full');
 const allowPrivate = args.includes('--allow-private');
 const target = args.find((a) => !a.startsWith('--'));
 
 if (!target) {
-  console.error('Usage: leakpatrol <url> [--json]');
+  console.error('Usage: leakpatrol <url> [--json] [--full]');
   process.exit(2);
 }
 
 try {
   const report = await scan(target, { allowPrivate });
-  if (json) {
+  if (full) {
+    process.stdout.write(renderMarkdown(toFullReport(report)));
+  } else if (json) {
     console.log(JSON.stringify(report, null, 2));
   } else {
     printReport(report);

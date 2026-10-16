@@ -9,6 +9,7 @@ security headers and exposed files, each with a plain-English fix.
 ```sh
 node src/cli.js myapp.lovable.app          # human-readable report
 node src/cli.js myapp.lovable.app --json   # JSON for the website/API
+node src/cli.js myapp.lovable.app --full   # full report (Markdown) with AI fix prompts
 node src/server.js                         # website + API on http://localhost:8080
 npm test                                   # runs against built-in broken and clean demo apps
 ```

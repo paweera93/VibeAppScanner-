@@ -61,3 +61,20 @@ test('score counts each finding type once', () => {
   const many = Array.from({ length: 10 }, () => ({ id: 'cookie-flags', severity: 'low' }));
   assert.equal(score(many).value, 98);
 });
+
+test('full report gives every finding a fix and AI prompts', async () => {
+  const { toFullReport, renderMarkdown } = await import('../src/report.js');
+  const { server, url } = await serve(APPS.broken);
+  try {
+    const full = toFullReport(await scan(url, { allowPrivate: true }));
+    assert.ok(full.findings.every((f) => f.fix));
+    const secret = full.findings.find((f) => f.category === 'secrets');
+    assert.match(secret.prompt, /server-side function/);
+    assert.ok(full.headersPrompt.includes('Content-Security-Policy'));
+    const md = renderMarkdown(full);
+    assert.match(md, /^# LeakPatrol report/);
+    assert.ok(!/sk-proj-[A-Za-z0-9_-]{40}/.test(md), 'full secrets must never appear in the report');
+  } finally {
+    server.close();
+  }
+});
