@@ -23,6 +23,11 @@ reused for 10 minutes.
 `FIRESTORE_PROJECT` set it writes to Firestore (collection `waitlist`, one document per
 email) using the Cloud Run service account; without it, emails stay in memory.
 
+Paid reports (`POST /api/checkout`, `POST /api/webhooks/lemonsqueezy`, `GET /api/report?id=`)
+are off unless `PAYMENTS_ENABLED=1` and `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,
+`LEMONSQUEEZY_VARIANT_ID` and `LEMONSQUEEZY_WEBHOOK_SECRET` are set. The buyer gets a private
+link (`/report.html?id=...`) that re-scans their site each time it's opened.
+
 Requires Node 22+. No dependencies.
 
 ## What the free scan checks
@@ -51,5 +56,6 @@ Requires Node 22+. No dependencies.
 2. Website: landing page, scan form and free results ✔ (paid report page comes with payments)
 3. Hosting: one Cloud Run service for site + API (rate limits built in) ✔
 4. Email waitlist under the locked fixes ✔
-5. Payments (Lemon Squeezy) and owner verification
-6. Launch
+5. Paid report and Lemon Squeezy checkout ✔ (off until switched on)
+6. Owner verification and deep Supabase checks
+7. Launch

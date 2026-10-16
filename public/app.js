@@ -4,6 +4,7 @@ const button = document.getElementById('scan-button');
 const statusEl = document.getElementById('status');
 const results = document.getElementById('results');
 
+let lastScannedUrl = '';
 const LABELS = { critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low', info: 'Info' };
 
 form.addEventListener('submit', async (e) => {
@@ -29,6 +30,7 @@ form.addEventListener('submit', async (e) => {
       showStatus('We could not reach that site. Check the address and that the site is online.', 'error');
     } else {
       statusEl.hidden = true;
+      lastScannedUrl = url;
       render(data);
     }
   } catch {
@@ -77,11 +79,34 @@ function render(r) {
 
   const unlock = document.getElementById('unlock');
   unlock.hidden = r.lockedFixes === 0;
+  document.getElementById('buy-block').hidden = !r.checkoutAvailable;
+  document.getElementById('waitlist-block').hidden = Boolean(r.checkoutAvailable);
   document.getElementById('locked-count').textContent = r.lockedFixes ? `${r.lockedFixes} more ${r.lockedFixes === 1 ? 'fix' : 'fixes'} waiting.` : '';
 
   results.hidden = false;
   results.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+document.getElementById('buy-button').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url: lastScannedUrl }),
+    });
+    const data = await res.json();
+    if (res.ok && data.checkoutUrl?.startsWith('https://')) {
+      location.href = data.checkoutUrl;
+      return;
+    }
+    showStatus(data.error || 'Checkout is not available right now. Please try again.', 'error');
+  } catch {
+    showStatus('Checkout is not available right now. Please try again.', 'error');
+  }
+  btn.disabled = false;
+});
 
 const waitlistForm = document.getElementById('waitlist-form');
 const waitlistStatus = document.getElementById('waitlist-status');

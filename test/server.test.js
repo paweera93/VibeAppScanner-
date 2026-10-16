@@ -72,3 +72,8 @@ test('waitlist rate limits one visitor', async () => {
   for (let i = 0; i < 6; i++) statuses.push((await postWaitlist({ email: `p${i}@example.com` }, '203.0.113.60')).status);
   assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
 });
+
+test('payments are off by default', async () => {
+  const res = await fetch(`${apiUrl}/api/checkout`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: 'example.com' }) });
+  assert.equal(res.status, 503);
+});

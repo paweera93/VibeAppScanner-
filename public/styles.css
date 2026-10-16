@@ -133,3 +133,25 @@ code { font-size: 0.9em; overflow-wrap: anywhere; }
 }
 
 .unlock .scan-form { margin-top: 12px; }
+.findings { list-style: none; padding: 0; display: grid; gap: 12px; }
+.prompt {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+.copy, .buy {
+  font: inherit;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.buy { padding: 12px 18px; font-weight: 600; margin-top: 8px; }
+.buy:disabled { opacity: 0.6; cursor: wait; }

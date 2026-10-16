@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Your full report · LeakPatrol</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/">LeakPatrol</a></header>
+  <main>
+    <section id="status" class="status" aria-live="polite">Loading your report…</section>
+
+    <section id="results" class="results" hidden>
+      <div class="score-card">
+        <div id="grade" class="grade">?</div>
+        <div>
+          <p class="score-line"><span id="score">0</span>/100</p>
+          <p id="scanned-url" class="muted"></p>
+        </div>
+      </div>
+      <ul id="counts" class="counts"></ul>
+      <p class="fine-print">Bookmark this page. It re-checks your site each time you open it (at most every 10 minutes), so you can watch your grade go up as you fix things. <a id="download" href="#">Download as Markdown</a></p>
+
+      <h2>Fix these, top first</h2>
+      <p class="muted">Paste each prompt into Lovable, Bolt, v0, Cursor or Claude Code. Rotate any leaked key yourself in that service's dashboard.</p>
+      <ol id="findings" class="findings"></ol>
+
+      <div id="headers-block" class="preview-item" hidden>
+        <h3>One prompt for all the missing security headers</h3>
+        <pre id="headers-prompt" class="prompt"></pre>
+        <button type="button" class="copy" data-target="headers-prompt">Copy prompt</button>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
+  <script src="/report.js" type="module"></script>
+</body>
+</html>

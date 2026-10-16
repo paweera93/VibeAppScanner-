@@ -1,0 +1,104 @@
+// End-to-end paid flow against a fake Lemon Squeezy API.
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import { createHmac } from 'node:crypto';
+import { APPS, serve } from './demo-apps.js';
+
+const SECRET = 'whsec_test';
+let api, apiUrl, demo, demoUrl, fakeLs;
+const checkoutRequests = [];
+
+before(async () => {
+  fakeLs = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      checkoutRequests.push({ headers: req.headers, body: JSON.parse(body) });
+      res.writeHead(201, { 'content-type': 'application/vnd.api+json' });
+      res.end(JSON.stringify({ data: { attributes: { url: 'https://leakpatrol.lemonsqueezy.com/checkout/custom/abc' } } }));
+    });
+  });
+  await new Promise((r) => fakeLs.listen(0, '127.0.0.1', r));
+  Object.assign(process.env, {
+    ALLOW_PRIVATE_TARGETS: '1',
+    PAYMENTS_ENABLED: '1',
+    LEMONSQUEEZY_API_BASE: `http://127.0.0.1:${fakeLs.address().port}`,
+    LEMONSQUEEZY_API_KEY: 'test-key',
+    LEMONSQUEEZY_STORE_ID: '1',
+    LEMONSQUEEZY_VARIANT_ID: '2',
+    LEMONSQUEEZY_WEBHOOK_SECRET: SECRET,
+  });
+  const { createServer } = await import('../src/server.js');
+  api = createServer();
+  await new Promise((r) => api.listen(0, '127.0.0.1', r));
+  apiUrl = `http://127.0.0.1:${api.address().port}`;
+  ({ server: demo, url: demoUrl } = await serve(APPS.broken));
+});
+
+after(() => {
+  api.close();
+  demo.close();
+  fakeLs.close();
+});
+
+const post = (path, body, headers = {}) =>
+  fetch(apiUrl + path, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body });
+
+function webhook(event, secret = SECRET) {
+  const raw = JSON.stringify(event);
+  return post('/api/webhooks/lemonsqueezy', raw, { 'x-signature': createHmac('sha256', secret).update(raw).digest('hex') });
+}
+
+const orderEvent = (reportId, status = 'paid') => ({
+  meta: { event_name: 'order_created', test_mode: true, custom_data: { report_id: reportId } },
+  data: { id: '99', attributes: { status, user_email: 'buyer@example.com' } },
+});
+
+test('scan result says checkout is available', async () => {
+  const r = await (await post('/api/scan', JSON.stringify({ url: demoUrl }))).json();
+  assert.equal(r.checkoutAvailable, true);
+});
+
+test('buy, pay, and read the full report', async () => {
+  const res = await post('/api/checkout', JSON.stringify({ url: demoUrl }));
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).checkoutUrl, 'https://leakpatrol.lemonsqueezy.com/checkout/custom/abc');
+
+  const sent = checkoutRequests.at(-1);
+  assert.equal(sent.headers.authorization, 'Bearer test-key');
+  const reportId = sent.body.data.attributes.checkout_data.custom.report_id;
+  assert.match(reportId, /^[0-9a-f]{32}$/);
+  assert.match(sent.body.data.attributes.product_options.redirect_url, new RegExp(`/report.html\\?id=${reportId}$`));
+  assert.equal(sent.body.data.relationships.variant.data.id, '2');
+
+  // Before the webhook arrives the report is pending.
+  assert.equal((await fetch(`${apiUrl}/api/report?id=${reportId}`)).status, 202);
+
+  // Forged and unpaid webhooks don't unlock it.
+  assert.equal((await webhook(orderEvent(reportId), 'wrong-secret')).status, 401);
+  assert.equal((await webhook(orderEvent(reportId, 'pending'))).status, 200);
+  assert.equal((await fetch(`${apiUrl}/api/report?id=${reportId}`)).status, 202);
+
+  assert.equal((await webhook(orderEvent(reportId))).status, 200);
+  const report = await fetch(`${apiUrl}/api/report?id=${reportId}`);
+  assert.equal(report.status, 200);
+  assert.equal(report.headers.get('cache-control'), 'no-store');
+  const { report: full } = await report.json();
+  assert.equal(full.score.grade, 'F');
+  assert.ok(full.findings.some((f) => f.prompt));
+
+  const md = await fetch(`${apiUrl}/api/report?id=${reportId}&format=md`);
+  assert.match(await md.text(), /^# LeakPatrol report/);
+});
+
+test('unknown or malformed report ids are 404', async () => {
+  assert.equal((await fetch(`${apiUrl}/api/report?id=${'0'.repeat(32)}`)).status, 404);
+  assert.equal((await fetch(`${apiUrl}/api/report?id=../../etc`)).status, 404);
+});
+
+test('serves the report page', async () => {
+  const res = await fetch(apiUrl + '/report.html');
+  assert.equal(res.status, 200);
+  assert.match(await res.text(), /Fix these, top first/);
+});
