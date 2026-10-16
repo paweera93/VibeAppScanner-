@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About · LeakPatrol</title>
+  <meta name="description" content="Who builds LeakPatrol, what it checks, and how it keeps scans safe.">
+  <link rel="canonical" href="https://getleakpatrol.com/about.html">
+  <meta property="og:image" content="https://getleakpatrol.com/og-image.png">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="/">LeakPatrol</a></header>
+  <main class="prose">
+    <h1>About LeakPatrol</h1>
+    <p>AI tools like Lovable, Bolt, v0, Replit and Cursor let anyone ship a real app in an afternoon. That's brilliant, but those tools often put secret keys in the browser code, skip database security rules, or leave private files public. The app works perfectly, so nobody notices until a bill arrives or the data leaks.</p>
+    <p>LeakPatrol is a quick, free check for exactly those mistakes. Paste your app's address and in about a minute you get a grade from A to F, a plain-English list of what's wrong, and fixes you can paste straight back into the tool that built your app.</p>
+
+    <h2>Who builds it</h2>
+    <p>I'm Paweera, a Site Reliability Engineer based in the UK. My day job is keeping e-commerce websites fast and secure on Google Cloud and Kubernetes, and before that I spent several years as a Linux engineer at a large financial company. I built LeakPatrol after seeing how many AI-built apps ship with the same handful of avoidable security holes.</p>
+
+    <h2>How we keep scans safe</h2>
+    <ul>
+      <li><strong>Read-only.</strong> We only fetch what any visitor's browser already downloads. We never log in, submit forms, or change or delete anything.</li>
+      <li><strong>Secrets are masked.</strong> If we find a key, we show only the first and last few characters and never store the full value.</li>
+      <li><strong>Private by default.</strong> We never publish anyone's results. If we ever notice a serious problem on a site, we tell the owner privately.</li>
+      <li><strong>Polite.</strong> Every request identifies itself as LeakPatrol, and scans are rate-limited.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <p>Questions, feedback or a false alarm? Email <a href="mailto:hello@getleakpatrol.com">hello@getleakpatrol.com</a>. To report abuse of the scanner, email <a href="mailto:abuse@getleakpatrol.com">abuse@getleakpatrol.com</a>.</p>
+  </main>
+  <footer class="site-footer"><a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:hello@getleakpatrol.com">Contact</a></footer>
+</body>
+</html>

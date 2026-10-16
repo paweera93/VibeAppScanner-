@@ -77,3 +77,9 @@ test('payments are off by default', async () => {
   const res = await fetch(`${apiUrl}/api/checkout`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: 'example.com' }) });
   assert.equal(res.status, 503);
 });
+
+test('serves the about page and the link preview image', async () => {
+  assert.equal((await fetch(apiUrl + '/about.html')).status, 200);
+  const img = await fetch(apiUrl + '/og-image.png');
+  assert.equal(img.headers.get('content-type'), 'image/png');
+});

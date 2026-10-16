@@ -24,7 +24,7 @@ const checkoutLimit = new RateLimiter({ limit: 10, windowMs: 60 * 60 * 1000 });
 const fullScans = new TtlCache(10 * 60 * 1000); // paid reports re-scan at most every 10 minutes
 const store = createStore();
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain', '.png': 'image/png' };
 const SECURITY_HEADERS = {
   'content-security-policy': "default-src 'self'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'",
   'x-content-type-options': 'nosniff',
@@ -44,7 +44,7 @@ export function createServer() {
       if (url.pathname === '/api/report' && req.method === 'GET') return await handleReport(url, res);
       if (url.pathname === '/healthz') return send(res, 200, 'ok', 'text/plain');
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed', 'text/plain');
-      return await serveStatic(url.pathname, res);
+      return await serveStatic(url, req, res);
     } catch (err) {
       console.error(JSON.stringify({ severity: 'ERROR', message: err.stack || String(err) }));
       if (!res.headersSent) sendJson(res, 500, { error: 'Something went wrong. Please try again.' });
@@ -182,8 +182,10 @@ async function handleReport(url, res) {
   return sendJson(res, 200, { status: 'paid', report: full }, { 'cache-control': 'no-store' });
 }
 
-async function serveStatic(pathname, res) {
+async function serveStatic(url, req, res) {
+  let pathname = url.pathname;
   if (pathname === '/') pathname = '/index.html';
+  if (pathname.endsWith('.html')) logPageView(pathname, url, req);
   const file = normalize(join(PUBLIC_DIR, pathname));
   if (!file.startsWith(PUBLIC_DIR)) return send(res, 404, 'Not found', 'text/plain');
   try {
@@ -193,6 +195,22 @@ async function serveStatic(pathname, res) {
     const data = await readFile(join(PUBLIC_DIR, '404.html')).catch(() => 'Not found');
     return send(res, 404, data, 'text/html; charset=utf-8');
   }
+}
+
+// Cookie-free visit counting: one log line per page view, with where the visitor came from.
+// No IP or personal data is logged. Count them in Cloud Logging (see README).
+function logPageView(path, url, req) {
+  const ua = String(req.headers['user-agent'] || '');
+  if (/bot|crawl|spider|preview|curl|wget|python|monitor|uptime/i.test(ua)) return;
+  let from = url.searchParams.get('ref') || url.searchParams.get('utm_source') || '';
+  if (!from) {
+    try {
+      from = new URL(req.headers.referer).hostname;
+    } catch {
+      from = 'direct';
+    }
+  }
+  console.log(JSON.stringify({ severity: 'INFO', event: 'pageview', path, from: from.slice(0, 60) }));
 }
 
 function clientIp(req) {

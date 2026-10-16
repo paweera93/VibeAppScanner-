@@ -31,6 +31,20 @@ link (`/report.html?id=...`) that re-scans their site each time it's opened.
 
 Requires Node 22+. No dependencies.
 
+## Visitor numbers
+
+Every page view logs one `pageview` line (page and where the visitor came from; no IP, no cookies).
+Bots are skipped. Add `?ref=x` or `?ref=reddit` to links you share to see which ones work.
+
+```sh
+# Page views in the last 7 days, grouped by source
+gcloud logging read 'resource.type="cloud_run_revision" AND jsonPayload.event="pageview"' \
+  --project app-safety-scan --freshness 7d --format 'value(jsonPayload.from)' | sort | uniq -c | sort -rn
+# Scans, waitlist sign-ups and paid reports in the last 7 days
+for e in scan waitlist_signup report_paid; do echo "$e: $(gcloud logging read "jsonPayload.event=\"$e\"" \
+  --project app-safety-scan --freshness 7d --format 'value(timestamp)' | wc -l)"; done
+```
+
 ## What the free scan checks
 
 | Check | Source |
