@@ -47,7 +47,14 @@
       <div id="unlock" class="unlock" hidden>
         <h3>Get every fix</h3>
         <p>The full report explains each problem in plain English and gives you a copy-paste prompt to fix it in Lovable, Bolt, Cursor or Claude Code. <span id="locked-count"></span></p>
-        <p class="muted">Full reports are coming soon.</p>
+        <p>Full reports are coming soon. Leave your email and we'll tell you when they're ready.</p>
+        <form id="waitlist-form" class="scan-form" novalidate>
+          <label for="email" class="visually-hidden">Your email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit" id="waitlist-button">Notify me</button>
+        </form>
+        <p id="waitlist-status" class="fine-print" aria-live="polite">One email when full reports launch, nothing else. Unsubscribe any time.</p>
       </div>
     </section>
 

@@ -58,3 +58,17 @@ test('rate limits a visitor after 5 scans, using the last X-Forwarded-For entry'
   }
   assert.equal(statuses.at(-1), 429);
 });
+
+const postWaitlist = (body, ip) =>
+  fetch(`${apiUrl}/api/waitlist`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-forwarded-for': ip }, body: JSON.stringify(body) });
+
+test('waitlist accepts a valid email and rejects a bad one', async () => {
+  assert.equal((await postWaitlist({ email: 'maker@example.com' }, '203.0.113.50')).status, 200);
+  assert.equal((await postWaitlist({ email: 'not-an-email' }, '203.0.113.50')).status, 400);
+});
+
+test('waitlist rate limits one visitor', async () => {
+  const statuses = [];
+  for (let i = 0; i < 6; i++) statuses.push((await postWaitlist({ email: `p${i}@example.com` }, '203.0.113.60')).status);
+  assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429]);
+});

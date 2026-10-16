@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { scan, normaliseTarget } from './scan.js';
 import { toFreeReport } from './report.js';
 import { RateLimiter, TtlCache } from './limits.js';
+import { createWaitlist, normaliseEmail } from './waitlist.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
@@ -16,6 +17,8 @@ const ALLOW_PRIVATE = process.env.ALLOW_PRIVATE_TARGETS === '1'; // tests only
 const perVisitor = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }); // 5 scans/hour/IP
 const perDomain = new TtlCache(10 * 60 * 1000); // reuse a domain's result for 10 minutes
 const inFlight = new Map();
+const signupLimit = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 });
+const waitlist = createWaitlist();
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
 const SECURITY_HEADERS = {
@@ -31,6 +34,7 @@ export function createServer() {
     try {
       const url = new URL(req.url, 'http://localhost');
       if (url.pathname === '/api/scan' && req.method === 'POST') return await handleScan(req, res);
+      if (url.pathname === '/api/waitlist' && req.method === 'POST') return await handleWaitlist(req, res);
       if (url.pathname === '/healthz') return send(res, 200, 'ok', 'text/plain');
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed', 'text/plain');
       return await serveStatic(url.pathname, res);
@@ -76,6 +80,24 @@ async function handleScan(req, res) {
   if (report.reachable) perDomain.set(key, free);
   console.log(JSON.stringify({ severity: 'INFO', event: 'scan', origin: key, score: report.score?.value ?? null, findings: report.findings.length }));
   return sendJson(res, 200, free);
+}
+
+async function handleWaitlist(req, res) {
+  const body = await readJson(req, 1024);
+  // Bots fill every field; people never see this one.
+  if (body?.website) return sendJson(res, 200, { ok: true });
+  let email;
+  try {
+    email = normaliseEmail(body?.email);
+  } catch {
+    return sendJson(res, 400, { error: 'Please enter a valid email address.' });
+  }
+  if (!signupLimit.allow(clientIp(req))) {
+    return sendJson(res, 429, { error: 'Too many sign-ups from your connection. Please try again later.' });
+  }
+  await waitlist.add(email, 'results');
+  console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup' }));
+  return sendJson(res, 200, { ok: true });
 }
 
 async function serveStatic(pathname, res) {

@@ -83,6 +83,34 @@ function render(r) {
   results.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const waitlistForm = document.getElementById('waitlist-form');
+const waitlistStatus = document.getElementById('waitlist-status');
+
+waitlistForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = new FormData(waitlistForm);
+  const btn = document.getElementById('waitlist-button');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: data.get('email'), website: data.get('website') }),
+    });
+    const body = await res.json();
+    if (res.ok) {
+      waitlistForm.hidden = true;
+      waitlistStatus.textContent = 'Thanks! We’ll email you when full reports are ready.';
+    } else {
+      waitlistStatus.textContent = body.error || 'Something went wrong. Please try again.';
+    }
+  } catch {
+    waitlistStatus.textContent = 'Something went wrong. Please try again.';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 // Builds DOM with textContent only, so scan output can never inject HTML.
 function el(tag, props, children = []) {
   const node = Object.assign(document.createElement(tag), props);

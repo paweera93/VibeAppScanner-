@@ -18,6 +18,10 @@ The website (`public/`) and API (`POST /api/scan`, `GET /healthz`) run as one co
 issue title and one example fix. Limits: 5 scans per visitor per hour, and a site's result is
 reused for 10 minutes.
 
+`POST /api/waitlist` stores emails of people who want the full report. With
+`FIRESTORE_PROJECT` set it writes to Firestore (collection `waitlist`, one document per
+email) using the Cloud Run service account; without it, emails stay in memory.
+
 Requires Node 22+. No dependencies.
 
 ## What the free scan checks
@@ -44,6 +48,7 @@ Requires Node 22+. No dependencies.
 
 1. Scanner core (this) ✔
 2. Website: landing page, scan form and free results ✔ (paid report page comes with payments)
-3. Hosting: one Cloud Run service for site + API (rate limits built in)
-4. Payments (Lemon Squeezy) and owner verification
-5. Launch
+3. Hosting: one Cloud Run service for site + API (rate limits built in) ✔
+4. Email waitlist under the locked fixes ✔
+5. Payments (Lemon Squeezy) and owner verification
+6. Launch
