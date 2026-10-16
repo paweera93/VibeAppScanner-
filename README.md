@@ -44,6 +44,6 @@ Requires Node 22+. No dependencies.
 
 1. Scanner core (this) ✔
 2. Website: landing page, scan form and free results ✔ (paid report page comes with payments)
-3. Hosting: Cloud Run for the scanner, Cloudflare Pages for the site, rate limits
+3. Hosting: one Cloud Run service for site + API (rate limits built in)
 4. Payments (Lemon Squeezy) and owner verification
 5. Launch
