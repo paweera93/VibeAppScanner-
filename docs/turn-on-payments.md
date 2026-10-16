@@ -2,6 +2,30 @@
 
 Do this only after the immigration adviser has said whose name the Lemon Squeezy account should be in. Until then the site shows the email waitlist instead of the "Get the full report · £9" button.
 
+## Just want to try the card page? Use a separate test copy of the site
+
+This leaves getleakpatrol.com untouched. Lemon Squeezy test mode never moves real money: only test cards work.
+
+1. Do step 1 below, but in the webhook URL use the test copy's address (you get it in step 3 of this section). You can add the webhook after the first deploy.
+2. Do step 2 below (secrets).
+3. Deploy a second service called `leakpatrol-test`:
+
+```
+gcloud run deploy leakpatrol-test --source . --region europe-west1 --project app-safety-scan --max-instances 1 --allow-unauthenticated \
+  --set-env-vars FIRESTORE_PROJECT=app-safety-scan,PAYMENTS_ENABLED=1,LEMONSQUEEZY_STORE_ID=STORE_ID,LEMONSQUEEZY_VARIANT_ID=VARIANT_ID \
+  --set-secrets LEMONSQUEEZY_API_KEY=ls-api-key:latest,LEMONSQUEEZY_WEBHOOK_SECRET=ls-webhook-secret:latest
+```
+
+4. Copy the service URL it prints (ending in `.run.app`). Set it as the public URL so the "after payment" link comes back here, not to getleakpatrol.com:
+
+```
+gcloud run services update leakpatrol-test --region europe-west1 --project app-safety-scan --update-env-vars PUBLIC_URL=https://YOUR-TEST-URL.run.app
+```
+
+5. In Lemon Squeezy, set the webhook URL to `https://YOUR-TEST-URL.run.app/api/webhooks/lemonsqueezy`.
+6. Open the test URL, scan a site, click **Get the full report · £9**, and pay with card `4242 4242 4242 4242`, any future expiry date and any CVC. You should land on your report page. The order also appears under Orders in Lemon Squeezy, marked as a test.
+7. When finished: `gcloud run services delete leakpatrol-test --region europe-west1 --project app-safety-scan`
+
 ## 1. Lemon Squeezy (in test mode first)
 
 1. The agreed account holder signs up at lemonsqueezy.com and creates a store. Leave **Test mode** switched on (toggle at the bottom left).
