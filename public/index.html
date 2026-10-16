@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>App Safety Scan · Is your vibe-coded app safe?</title>
+  <meta name="description" content="Free security check for apps built with Lovable, Bolt, v0, Replit and Cursor. Find leaked API keys, open Supabase settings and missing security headers in a minute.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">App Safety Scan</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Is your vibe-coded app safe?</h1>
+      <p class="lead">Paste your app's address. In about a minute we check for leaked API keys, exposed Supabase keys, public <code>.env</code> files and missing security headers. Built for apps made with Lovable, Bolt, v0, Replit and Cursor.</p>
+
+      <form id="scan-form" class="scan-form" novalidate>
+        <label for="url" class="visually-hidden">Your app's address</label>
+        <input id="url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="myapp.lovable.app" required>
+        <button type="submit" id="scan-button">Scan for free</button>
+      </form>
+      <p class="fine-print">Read-only and safe: we only look at what any visitor's browser already downloads. Only scan apps you own or have permission to test.</p>
+    </section>
+
+    <section id="status" class="status" hidden aria-live="polite"></section>
+
+    <section id="results" class="results" hidden>
+      <div class="score-card">
+        <div id="grade" class="grade">?</div>
+        <div>
+          <p class="score-line"><span id="score">0</span>/100</p>
+          <p id="scanned-url" class="muted"></p>
+        </div>
+      </div>
+      <ul id="counts" class="counts"></ul>
+
+      <h2>What we found</h2>
+      <ol id="issues" class="issues"></ol>
+
+      <div id="preview" class="preview"></div>
+
+      <div id="unlock" class="unlock" hidden>
+        <h3>Get every fix</h3>
+        <p>The full report explains each problem in plain English and gives you a copy-paste prompt to fix it in Lovable, Bolt, Cursor or Claude Code. <span id="locked-count"></span></p>
+        <p class="muted">Full reports are coming soon.</p>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>What we check</h2>
+      <div class="grid">
+        <div class="card"><h3>Leaked secrets</h3><p>OpenAI, Anthropic, Stripe, AWS, GitHub and Supabase service keys hiding in your JavaScript.</p></div>
+        <div class="card"><h3>Supabase setup</h3><p>Whether you use Supabase, and whether a key that bypasses every security rule has been shipped to the browser.</p></div>
+        <div class="card"><h3>Exposed files</h3><p>Public <code>.env</code> files, <code>.git</code> folders and source maps that give away your code.</p></div>
+        <div class="card"><h3>Security headers</h3><p>The browser protections most AI-built apps are missing, with the exact lines to add.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

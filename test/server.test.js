@@ -1,0 +1,60 @@
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import { APPS, serve } from './demo-apps.js';
+
+let api, apiUrl, demo, demoUrl;
+
+before(async () => {
+  process.env.ALLOW_PRIVATE_TARGETS = '1';
+  const { createServer } = await import('../src/server.js');
+  api = createServer();
+  await new Promise((r) => api.listen(0, '127.0.0.1', r));
+  apiUrl = `http://127.0.0.1:${api.address().port}`;
+  ({ server: demo, url: demoUrl } = await serve(APPS.broken));
+});
+
+after(() => {
+  api.close();
+  demo.close();
+});
+
+const postScan = (url, headers = {}) =>
+  fetch(`${apiUrl}/api/scan`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify({ url }) });
+
+test('serves the landing page with security headers', async () => {
+  const res = await fetch(apiUrl + '/');
+  assert.equal(res.status, 200);
+  assert.match(await res.text(), /Is your vibe-coded app safe\?/);
+  assert.ok(res.headers.get('content-security-policy'));
+});
+
+test('blocks path traversal', async () => {
+  const res = await fetch(apiUrl + '/..%2f..%2fpackage.json');
+  assert.equal(res.status, 404);
+});
+
+test('free report shows issues but locks the fixes', async () => {
+  const res = await postScan(demoUrl, { 'x-forwarded-for': '203.0.113.1' });
+  assert.equal(res.status, 200);
+  const r = await res.json();
+  assert.equal(r.score.grade, 'F');
+  assert.ok(r.issues.length > 3);
+  assert.equal(r.preview.length, 1);
+  assert.equal(r.lockedFixes, r.issues.length - 1);
+  assert.ok(r.issues.every((i) => !('fix' in i)), 'issue list must not include fixes');
+});
+
+test('rejects bad input', async () => {
+  const res = await postScan('ftp://example.com', { 'x-forwarded-for': '203.0.113.2' });
+  assert.equal(res.status, 400);
+});
+
+test('rate limits a visitor after 5 scans, using the last X-Forwarded-For entry', async () => {
+  // Distinct targets so the cache doesn't answer. Spoofed first entries must not reset the limit.
+  const statuses = [];
+  for (let i = 0; i < 6; i++) {
+    const res = await postScan(`${demoUrl}?n=${i}`.replace('127.0.0.1', `127.0.0.${i + 2}`), { 'x-forwarded-for': `10.0.0.${i}, 198.51.100.7` });
+    statuses.push(res.status);
+  }
+  assert.equal(statuses.at(-1), 429);
+});

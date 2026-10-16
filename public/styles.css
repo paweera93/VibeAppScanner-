@@ -1,0 +1,133 @@
+:root {
+  --bg: #fbfbfd;
+  --surface: #ffffff;
+  --text: #16181d;
+  --muted: #5d6370;
+  --border: #e3e5ea;
+  --accent: #3b5bdb;
+  --accent-text: #ffffff;
+  --critical: #c92a2a;
+  --high: #e8590c;
+  --medium: #b08800;
+  --low: #5c7cfa;
+  --good: #2b8a3e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111318;
+    --surface: #1a1d24;
+    --text: #eceef2;
+    --muted: #9aa1ad;
+    --border: #2c303a;
+    --accent: #748ffc;
+    --accent-text: #0b0d12;
+    --critical: #ff6b6b;
+    --high: #ff922b;
+    --medium: #fcc419;
+    --low: #91a7ff;
+    --good: #51cf66;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+main, .site-header, .site-footer { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+
+.site-header { padding-top: 20px; }
+.brand { font-weight: 700; color: var(--text); text-decoration: none; }
+
+.hero { padding: 56px 0 24px; }
+h1 { font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.15; margin: 0 0 16px; }
+.lead { font-size: 1.1rem; color: var(--muted); margin: 0 0 28px; }
+
+.scan-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.scan-form input {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+.scan-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.scan-form button {
+  padding: 14px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.scan-form button:disabled { opacity: 0.6; cursor: wait; }
+.fine-print { font-size: 0.85rem; color: var(--muted); margin-top: 12px; }
+
+.status { padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.status.error { border-color: var(--critical); color: var(--critical); }
+
+.results { padding: 24px 0; }
+.score-card { display: flex; align-items: center; gap: 20px; }
+.grade {
+  width: 84px; height: 84px; border-radius: 20px;
+  display: grid; place-items: center;
+  font-size: 2.6rem; font-weight: 800;
+  background: var(--surface); border: 3px solid var(--border);
+}
+.grade-a, .grade-b { border-color: var(--good); color: var(--good); }
+.grade-c { border-color: var(--medium); color: var(--medium); }
+.grade-d, .grade-f { border-color: var(--critical); color: var(--critical); }
+.score-line { font-size: 1.6rem; font-weight: 700; margin: 0; }
+.muted { color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+
+.counts { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.count { padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); }
+.count.sev-critical strong { color: var(--critical); }
+.count.sev-high strong { color: var(--high); }
+.count.sev-medium strong { color: var(--medium); }
+.count.sev-low strong { color: var(--low); }
+
+.issues { padding-left: 20px; }
+.issues li { margin: 8px 0; }
+.badge { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; border: 1px solid currentColor; }
+.badge.sev-critical { color: var(--critical); }
+.badge.sev-high { color: var(--high); }
+.badge.sev-medium { color: var(--medium); }
+.badge.sev-low { color: var(--low); }
+
+.preview-item, .unlock, .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.preview-item h3, .unlock h3, .card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.unlock { border-color: var(--accent); }
+
+code { font-size: 0.9em; overflow-wrap: anywhere; }
+
+.how { padding: 32px 0 48px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { margin: 0; }
+.card p { margin: 0; color: var(--muted); }
+
+.site-footer { padding: 24px 16px 40px; color: var(--muted); font-size: 0.9rem; }
+.site-footer a { color: var(--muted); }
+
+.prose { padding: 40px 0; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
