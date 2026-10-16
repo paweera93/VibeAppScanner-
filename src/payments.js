@@ -16,7 +16,10 @@ export function paymentsConfig(env = process.env) {
     webhookSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET,
     publicUrl: (env.PUBLIC_URL || 'https://getleakpatrol.com').replace(/\/$/, ''),
   };
-  cfg.enabled = env.PAYMENTS_ENABLED === '1' && Boolean(cfg.apiKey && cfg.storeId && cfg.variantId && cfg.webhookSecret);
+  // Demo mode: "buying" unlocks the report at once with no payment. For trying the flow on
+  // your own computer only, so it is ignored on Cloud Run (which always sets K_SERVICE).
+  cfg.demo = env.PAYMENTS_DEMO === '1' && !env.K_SERVICE;
+  cfg.enabled = cfg.demo || (env.PAYMENTS_ENABLED === '1' && Boolean(cfg.apiKey && cfg.storeId && cfg.variantId && cfg.webhookSecret));
   return cfg;
 }
 

@@ -121,6 +121,10 @@ async function handleCheckout(req, res) {
     return sendJson(res, 429, { error: 'Too many checkout attempts. Please try again later.' });
   }
   const reportId = newReportId();
+  if (cfg.demo) {
+    await store.create('reports', reportId, { origin: target.origin, status: 'paid', paidAt: new Date(), testMode: true, createdAt: new Date() });
+    return sendJson(res, 200, { checkoutUrl: `/report.html?id=${reportId}` });
+  }
   await store.create('reports', reportId, { origin: target.origin, status: 'pending', createdAt: new Date() });
   const checkoutUrl = await createCheckout(cfg, { reportId, origin: target.origin });
   console.log(JSON.stringify({ severity: 'INFO', event: 'checkout_created', origin: target.origin }));

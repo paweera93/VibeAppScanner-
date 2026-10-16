@@ -97,7 +97,7 @@ document.getElementById('buy-button').addEventListener('click', async (e) => {
       body: JSON.stringify({ url: lastScannedUrl }),
     });
     const data = await res.json();
-    if (res.ok && data.checkoutUrl?.startsWith('https://')) {
+    if (res.ok && /^(https:\/\/|\/report\.html\?id=)/.test(data.checkoutUrl || '')) {
       location.href = data.checkoutUrl;
       return;
     }

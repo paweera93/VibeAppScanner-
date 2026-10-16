@@ -11,6 +11,7 @@ node src/cli.js myapp.lovable.app          # human-readable report
 node src/cli.js myapp.lovable.app --json   # JSON for the website/API
 node src/cli.js myapp.lovable.app --full   # full report (Markdown) with AI fix prompts
 node src/server.js                         # website + API on http://localhost:8080
+PAYMENTS_DEMO=1 node src/server.js         # same, with the paid flow unlocked free (local only)
 npm test                                   # runs against built-in broken and clean demo apps
 ```
 
