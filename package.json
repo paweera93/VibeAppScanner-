@@ -1,0 +1,18 @@
+{
+  "name": "app-safety-scan",
+  "version": "0.1.0",
+  "description": "Read-only security scanner for vibe-coded web apps (Lovable, Bolt, v0, Replit, Cursor).",
+  "type": "module",
+  "bin": {
+    "app-safety-scan": "src/cli.js"
+  },
+  "scripts": {
+    "scan": "node src/cli.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
