@@ -12,6 +12,7 @@ import { addToWaitlist, normaliseEmail } from './waitlist.js';
 import { createStore } from './store.js';
 import { paymentsConfig, newReportId, createCheckout, verifySignature, paidOrderFrom, REPORT_ID_RE } from './payments.js';
 import { newVerifyToken, checkOwnership, instructions } from './verify.js';
+import { emailConfig, sendEmail, waitlistWelcome, waitlistAlert } from './email.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
@@ -109,8 +110,20 @@ async function handleWaitlist(req, res) {
   if (!signupLimit.allow(clientIp(req))) {
     return sendJson(res, 429, { error: 'Too many sign-ups from your connection. Please try again later.' });
   }
-  await addToWaitlist(store, email, 'results');
-  console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup' }));
+  const isNew = await addToWaitlist(store, email, 'results');
+  console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup', isNew }));
+  if (isNew) {
+    // Sent before replying: Cloud Run may pause the container once the response is out.
+    // A failed email is logged but never fails the sign-up, which is already saved.
+    const cfg = emailConfig();
+    const results = await Promise.allSettled([
+      sendEmail(cfg, { to: email, ...waitlistWelcome() }),
+      sendEmail(cfg, { to: cfg.notify, ...waitlistAlert(email) }),
+    ]);
+    for (const r of results) {
+      if (r.status === 'rejected') console.error(JSON.stringify({ severity: 'ERROR', event: 'email_failed', message: String(r.reason?.message || r.reason) }));
+    }
+  }
   return sendJson(res, 200, { ok: true });
 }
 

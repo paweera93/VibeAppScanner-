@@ -11,7 +11,8 @@ export function normaliseEmail(input) {
 }
 
 // The document id is a hash of the email, so signing up twice is harmless.
+// Returns true only for a new sign-up, so emails go out once per address.
 export async function addToWaitlist(store, email, source) {
   const id = createHash('sha256').update(email).digest('hex');
-  await store.create('waitlist', id, { email, source, createdAt: new Date() });
+  return store.create('waitlist', id, { email, source, createdAt: new Date() });
 }

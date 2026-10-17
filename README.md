@@ -23,7 +23,9 @@ reused for 10 minutes.
 
 `POST /api/waitlist` stores emails of people who want the full report. With
 `FIRESTORE_PROJECT` set it writes to Firestore (collection `waitlist`, one document per
-email) using the Cloud Run service account; without it, emails stay in memory.
+email) using the Cloud Run service account; without it, emails stay in memory. A new sign-up gets a
+confirmation email and the owner gets an alert at `NOTIFY_EMAIL` (default hello@getleakpatrol.com),
+sent through Resend once `RESEND_API_KEY` is set (`src/email.js`, setup in `docs/turn-on-email.md`).
 
 Paid reports (`POST /api/checkout`, `POST /api/webhooks/lemonsqueezy`, `GET /api/report?id=`)
 are off unless `PAYMENTS_ENABLED=1` and `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_STORE_ID`,

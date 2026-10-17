@@ -162,7 +162,7 @@ waitlistForm.addEventListener('submit', async (e) => {
     const body = await res.json();
     if (res.ok) {
       waitlistForm.hidden = true;
-      waitlistStatus.textContent = 'Thanks! We’ll email you when full reports are ready.';
+      waitlistStatus.textContent = 'Thanks! Check your inbox for a confirmation. We’ll email you when full reports are ready.';
     } else {
       waitlistStatus.textContent = body.error || 'Something went wrong. Please try again.';
     }
