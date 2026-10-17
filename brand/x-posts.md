@@ -20,7 +20,7 @@ outside links to fewer people.
 > • every problem, most serious first
 > • a plain-English fix for each
 >
-> It looks for leaked API keys (OpenAI, Anthropic, Stripe, AWS, GitHub), Supabase service keys, public .env and .git files, source maps and missing security headers.
+> It checks for leaked API keys (OpenAI, Stripe, AWS…), Supabase service keys, public .env and .git files, and missing security headers.
 
 **3/4**
 > It's read-only: it only looks at what any visitor's browser already downloads. It never logs in, never changes anything, and masks any key it finds.
@@ -38,7 +38,7 @@ outside links to fewer people.
 **Day 2: the anon key myth**
 > "Is my Supabase anon key in the frontend a problem?"
 >
-> No, it's meant to be public. The real question is whether Row Level Security is on for every table. Without it, anyone with that public key can read your whole database.
+> No, it's meant to be public. The real question: is Row Level Security on for every table? Without it, anyone with that key can read your whole database.
 >
 > The service_role key, though? Never in the browser. Ever.
 
