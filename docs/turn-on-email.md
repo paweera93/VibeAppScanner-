@@ -38,9 +38,17 @@ gcloud run deploy app-safety-scan --source . --region europe-west1 --project app
 
 ## 4. Test
 
-Join the waitlist on the live site with an address you can check (not the Gmail that
-hello@ forwards to, or Gmail may hide the copy). You should get the confirmation, and the
-sign-up alert should arrive in your inbox via hello@getleakpatrol.com.
+Join the waitlist on the live site with your own email. You should get the confirmation, and
+the sign-up alert should arrive in your inbox via hello@getleakpatrol.com.
+
+To try it before the domain is verified, run the site on your computer with Resend's test
+sender. It can only send to the email you signed up to Resend with:
+
+```
+RESEND_API_KEY='PASTE_KEY' EMAIL_FROM='LeakPatrol <onboarding@resend.dev>' NOTIFY_EMAIL='you@example.com' node src/server.js
+```
+
+Then join the waitlist at http://localhost:8080 with that same email.
 
 If nothing arrives, check the logs for `email_failed`:
 
