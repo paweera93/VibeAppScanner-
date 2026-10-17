@@ -14,7 +14,7 @@ export function paymentsConfig(env = process.env) {
     storeId: env.LEMONSQUEEZY_STORE_ID,
     variantId: env.LEMONSQUEEZY_VARIANT_ID,
     webhookSecret: env.LEMONSQUEEZY_WEBHOOK_SECRET,
-    publicUrl: (env.PUBLIC_URL || 'https://getleakpatrol.com').replace(/\/$/, ''),
+    publicUrl: (env.PUBLIC_URL || 'https://www.getleakpatrol.com').replace(/\/$/, ''),
   };
   // Demo mode: "buying" unlocks the report at once with no payment. For trying the flow on
   // your own computer only, so it is ignored on Cloud Run (which always sets K_SERVICE).

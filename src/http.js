@@ -1,7 +1,7 @@
 // Small, polite HTTP client: GET only, timeouts, size caps, identifying user agent.
 
 export const USER_AGENT =
-  'LeakPatrol/0.1 (+read-only security check; contact: abuse@getleakpatrol.com; https://getleakpatrol.com)';
+  'LeakPatrol/0.1 (+read-only security check; contact: abuse@getleakpatrol.com; https://www.getleakpatrol.com)';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;

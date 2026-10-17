@@ -87,3 +87,21 @@ test('serves the about page and the link preview image', async () => {
 test('config says whether checkout is on', async () => {
   assert.deepEqual(await (await fetch(apiUrl + '/api/config')).json(), { checkoutAvailable: false });
 });
+
+test('the bare domain redirects pages to www, but not POSTs', async () => {
+  const { request } = await import('node:http');
+  const call = (method, path) =>
+    new Promise((resolve) => {
+      const req = request(`${apiUrl}${path}`, { method, headers: { host: 'getleakpatrol.com' } }, (res) => {
+        res.resume();
+        resolve(res);
+      });
+      req.end();
+    });
+  const page = await call('GET', '/about.html?ref=x');
+  assert.equal(page.statusCode, 301);
+  assert.equal(page.headers.location, 'https://www.getleakpatrol.com/about.html?ref=x');
+  assert.notEqual((await call('POST', '/api/webhooks/lemonsqueezy')).statusCode, 301);
+  // www itself is served normally.
+  assert.equal((await fetch(apiUrl + '/', { headers: { host: 'www.getleakpatrol.com' } })).status, 200);
+});

@@ -41,10 +41,10 @@ export const waitlistWelcome = () => ({
     `Thanks for signing up.\n\n` +
     `We'll send you one email when full LeakPatrol reports are ready: every fix for your app in plain English, ` +
     `with a copy-paste prompt for Lovable, Bolt, v0, Replit, Cursor or Claude Code.\n\n` +
-    `In the meantime you can re-run the free scan any time at https://getleakpatrol.com\n\n` +
+    `In the meantime you can re-run the free scan any time at https://www.getleakpatrol.com\n\n` +
     `Questions? Just reply to this email.\n\n` +
     `LeakPatrol\n\n` +
-    `--\nYou're getting this because this address was entered on getleakpatrol.com. ` +
+    `--\nYou're getting this because this address was entered on www.getleakpatrol.com. ` +
     `If that wasn't you, ignore this email and you won't hear from us again. To be removed, reply "remove".\n`,
 });
 

@@ -33,7 +33,7 @@ gcloud run services update leakpatrol-test --region europe-west1 --project app-s
 3. Settings → Stores: note the **store ID**.
 4. Settings → API: create an API key. Copy it straight into step 2 below, not into chat.
 5. Settings → Webhooks → add:
-   - URL: `https://getleakpatrol.com/api/webhooks/lemonsqueezy`
+   - URL: `https://www.getleakpatrol.com/api/webhooks/lemonsqueezy`
    - Signing secret: any long random string (for example from `openssl rand -hex 32`)
    - Events: tick **order_created** only
 

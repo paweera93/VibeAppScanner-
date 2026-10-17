@@ -20,6 +20,9 @@ const ALLOW_PRIVATE = process.env.ALLOW_PRIVATE_TARGETS === '1'; // tests only
 // Tests only: send Supabase API calls to a local fake instead of *.supabase.co.
 const SUPABASE_TEST_BASE = ALLOW_PRIVATE ? process.env.SUPABASE_TEST_BASE : undefined;
 const supabaseRewrite = SUPABASE_TEST_BASE ? () => SUPABASE_TEST_BASE : undefined;
+// The site's one public address. Page requests to the bare domain are sent here.
+const CANONICAL_HOST = process.env.CANONICAL_HOST || 'www.getleakpatrol.com';
+const BARE_HOST = CANONICAL_HOST.replace(/^www\./, '');
 
 const perVisitor = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }); // 5 scans/hour/IP
 const perDomain = new TtlCache(10 * 60 * 1000); // reuse a domain's result for 10 minutes
@@ -43,6 +46,11 @@ export function createServer() {
   return http.createServer(async (req, res) => {
     try {
       const url = new URL(req.url, 'http://localhost');
+      // Only GET/HEAD: redirecting a POST (a payment webhook, say) would drop its body.
+      if (String(req.headers.host || '').toLowerCase() === BARE_HOST && (req.method === 'GET' || req.method === 'HEAD')) {
+        res.writeHead(301, { location: `https://${CANONICAL_HOST}${req.url}`, ...SECURITY_HEADERS });
+        return res.end();
+      }
       if (url.pathname === '/api/scan' && req.method === 'POST') return await handleScan(req, res);
       if (url.pathname === '/api/waitlist' && req.method === 'POST') return await handleWaitlist(req, res);
       if (url.pathname === '/api/checkout' && req.method === 'POST') return await handleCheckout(req, res);
