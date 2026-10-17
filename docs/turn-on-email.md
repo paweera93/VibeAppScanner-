@@ -1,8 +1,7 @@
 # Turning on LeakPatrol emails
 
 When someone joins the waitlist, the site sends them a "You're on the list" email and sends
-you a "New waitlist sign-up" alert at hello@getleakpatrol.com (which Cloudflare forwards to
-your inbox). Until the steps below are done, nothing is sent: sign-ups are still saved, and the
+you a "New waitlist sign-up" alert at `NOTIFY_EMAIL`. Until the steps below are done, nothing is sent: sign-ups are still saved, and the
 logs show `email_skipped`.
 
 Sending goes through Resend (free for up to 3,000 emails a month). Receiving mail at
@@ -33,13 +32,22 @@ and last commands from step 2 of `turn-on-payments.md`.)
 
 ```
 gcloud run deploy app-safety-scan --source . --region europe-west1 --project app-safety-scan \
-  --update-secrets RESEND_API_KEY=resend-api-key:latest
+  --update-secrets RESEND_API_KEY=resend-api-key:latest \
+  --update-env-vars NOTIFY_EMAIL=you@gmail.com
 ```
+
+Set `NOTIFY_EMAIL` to a real inbox. If it's left at the default (hello@getleakpatrol.com), the
+alert goes Resend → Cloudflare forwarding → Gmail, and Gmail tends to file or drop that.
 
 ## 4. Test
 
-Join the waitlist on the live site with your own email. You should get the confirmation, and
-the sign-up alert should arrive in your inbox via hello@getleakpatrol.com.
+Join the waitlist on the live site with a plus-address of your own email, for example
+you+test1@gmail.com (each new address counts as a new sign-up; repeats send nothing). You
+should get the confirmation and the sign-up alert. Gmail puts both in the Updates tab.
+
+To test hello@ forwarding, send from a different account than the one it forwards to: Gmail
+hides forwarded copies of mail you sent yourself. Cloudflare's Email Routing activity log shows
+what it received.
 
 To try it before the domain is verified, run the site on your computer with Resend's test
 sender. It can only send to the email you signed up to Resend with:
@@ -56,4 +64,3 @@ If nothing arrives, check the logs for `email_failed`:
 gcloud logging read 'jsonPayload.event="email_failed"' --project app-safety-scan --freshness 1d --format 'value(jsonPayload.message)'
 ```
 
-To send the alerts somewhere else, add `--update-env-vars NOTIFY_EMAIL=you@example.com` to the deploy.
