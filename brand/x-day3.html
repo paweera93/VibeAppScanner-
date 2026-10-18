@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1200px;height:675px;overflow:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",sans-serif;color:#f1f3fa;
+background:radial-gradient(800px 500px at 90% 0%,rgba(76,98,200,.4),transparent 62%),radial-gradient(600px 400px at 0% 100%,rgba(120,40,80,.26),transparent 60%),#0d1020;
+display:grid;grid-template-columns:1fr 600px;gap:48px;align-items:center;padding:0 64px 0 72px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:26px;margin-bottom:28px}
+.brand img{width:40px;height:40px;border-radius:9px}
+h1{font-size:50px;line-height:1.08;font-weight:800;letter-spacing:-.035em}
+h1 span{color:#8197ff}
+p{margin-top:20px;font-size:22px;color:#a3abc4;line-height:1.45}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:22px 24px;box-shadow:0 30px 80px rgba(0,0,0,.45);transform:rotate(1.2deg)}
+.file{font-size:15px;color:#a3abc4;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+.dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18);display:inline-block}
+ul{list-style:none;padding:0;display:grid;gap:9px}
+li{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 14px;border-radius:11px;background:rgba(255,255,255,.05);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:16.5px}
+li.bad{background:rgba(255,107,139,.12);border:1px solid rgba(255,107,139,.35)}
+.k{color:#f1f3fa}.pre{color:#fcc419}
+.tag{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:13px;font-weight:750;padding:2px 9px;border-radius:6px;border:1px solid currentColor;white-space:nowrap}
+.ok{color:#51cf66}.no{color:#ff6b8b}
+.note{margin-top:14px;font-size:15px;color:#a3abc4}
+</style></head><body>
+<div>
+  <div class="brand"><img src="../public/logo.png" alt="">LeakPatrol</div>
+  <h1>Anything starting with <span>VITE_</span> ships to every visitor.</h1>
+  <p>Same for NEXT_PUBLIC_ and REACT_APP_. Fine for public keys. A leak for secret ones.</p>
+</div>
+<div class="card">
+  <div class="file"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;.env</div>
+  <ul>
+    <li><span class="k"><span class="pre">VITE_</span>SUPABASE_URL</span><span class="tag ok">Public, fine</span></li>
+    <li><span class="k"><span class="pre">VITE_</span>SUPABASE_ANON_KEY</span><span class="tag ok">Public by design</span></li>
+    <li class="bad"><span class="k"><span class="pre">VITE_</span>OPENAI_API_KEY</span><span class="tag no">Leaked</span></li>
+    <li class="bad"><span class="k"><span class="pre">NEXT_PUBLIC_</span>STRIPE_SECRET</span><span class="tag no">Leaked</span></li>
+    <li><span class="k">OPENAI_API_KEY</span><span class="tag ok">Server only</span></li>
+  </ul>
+  <div class="note">Secret keys: drop the prefix and call them from a server function.</div>
+</div>
+</body></html>
