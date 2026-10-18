@@ -61,6 +61,14 @@ Best time: a weekday, 14:00–16:00 UK time. Stay around for 2–3 hours to answ
 
 Check each server's rules for self-promotion first, and post once per server.
 
+Server notes (Discord account "LeakPatrol", created 18 Oct, signed in on Browser 2):
+
+| Server | Joined | Can we share LeakPatrol? |
+|---|---|---|
+| Lovable (discord.com/invite/lovable-dev) | 18 Oct | **No.** Rule 5 bans promoting products; #lovable-built-showcase is only for things built with Lovable. Only helpful answers, no links. |
+| Supabase | not yet | check rules |
+| Bolt | not yet | get the invite from bolt.new itself |
+
 ## Weekly rhythm
 
 | When | What |
