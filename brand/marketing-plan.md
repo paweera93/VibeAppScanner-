@@ -5,13 +5,13 @@ email list, so there's an audience ready on the day the £9 report goes live.
 
 ## Where we're starting (18 Oct 2026)
 
-Over the 3 days since launch (including our own testing):
+Over the 3 days since launch (page views and scans include our own testing):
 
 | | So far |
 |---|---|
 | Page views | ~480 |
 | Scans | 21 |
-| New email sign-ups | 7 |
+| Email sign-ups from real visitors | 0 or 1 (the other 7 were our own tests) |
 | Visits from X | 2 (both on 18 Oct, after the first replies) |
 
 Every link we share carries `?ref=<channel>`, so the page-view logs show which channel works.
