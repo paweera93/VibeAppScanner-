@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Security check · LeakPatrol</title>
+  <meta name="description" content="Confirmation of a LeakPatrol security check.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose">
+    <h1 id="title">Checking…</h1>
+    <p id="line" class="lead-p"></p>
+    <h2>What LeakPatrol checked</h2>
+    <ul>
+      <li>No secret API keys (OpenAI, Stripe, AWS, Supabase service keys and others) visible in the site's JavaScript</li>
+      <li>No public <code>.env</code> files, <code>.git</code> folders or source maps</li>
+      <li>Security headers and HTTPS</li>
+      <li>For Supabase apps: which database tables can be read without logging in</li>
+    </ul>
+    <p>The owner proved they control this site before the check. A grade A means none of these common, visible problems were found. It is not a full security audit.</p>
+    <p><a class="button" href="/">Check your own app free</a></p>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+  <script src="/verified.js" type="module"></script>
+</body>
+</html>

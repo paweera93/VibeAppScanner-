@@ -27,11 +27,17 @@
         </div>
       </div>
       <ul id="counts" class="counts"></ul>
+
+      <div id="progress-block" class="progress-card" hidden>
+        <h3>Your progress</h3>
+        <p id="progress-line"></p>
+        <ul id="progress-fixed" class="fixed-list"></ul>
+      </div>
       <p class="fine-print">Bookmark this page. It re-checks your site each time you open it (at most every 10 minutes), so you can watch your grade go up as you fix things. <a id="download" href="#">Download as Markdown</a></p>
 
       <div id="verify-block" class="unlock" hidden>
-        <h3>Unlock the database check</h3>
-        <p>Your app uses Supabase. Prove you own this site and we will also check which of your tables anyone can read without logging in. This is the most common serious leak in AI-built apps. We read at most one row per table, keep only the column names, and never change anything.</p>
+        <h3 id="verify-title">Unlock the database check</h3>
+        <p id="verify-intro">Your app uses Supabase. Prove you own this site and we will also check which of your tables anyone can read without logging in. This is the most common serious leak in AI-built apps. We read at most one row per table, keep only the column names, and never change anything.</p>
         <p>Do <strong>one</strong> of these, publish your site, then press the button:</p>
         <ol class="verify-steps">
           <li><strong>Easiest:</strong> add this tag inside <code>&lt;head&gt;</code> in <code>index.html</code>. In Lovable or Bolt, paste the prompt below.
@@ -47,13 +53,44 @@
       </div>
 
       <h2>Fix these, top first</h2>
-      <p class="muted">Paste each prompt into Lovable, Bolt, v0, Cursor or Claude Code. Rotate any leaked key yourself in that service's dashboard.</p>
+      <p id="fix-intro" class="muted">Paste each prompt into Lovable, Bolt, v0, Cursor or Claude Code. Rotate any leaked key yourself in that service's dashboard.</p>
+      <p class="help-line">Stuck on a fix, or it didn't work? Email <a href="mailto:hello@getleakpatrol.com">hello@getleakpatrol.com</a> or reply to your order email. A real engineer will help you.</p>
       <ol id="findings" class="findings"></ol>
 
       <div id="headers-block" class="preview-item" hidden>
         <h3>One prompt for all the missing security headers</h3>
         <pre id="headers-prompt" class="prompt"></pre>
         <button type="button" class="copy" data-target="headers-prompt">Copy prompt</button>
+      </div>
+
+      <div id="database-block" class="unlock" hidden>
+        <h3>Deep database check, without giving us access</h3>
+        <p>Scanning from outside can't see your Supabase settings. This check can: you run one read-only query in your own Supabase project and paste the result here. We never see your keys or your data, and we don't store what you paste.</p>
+        <ol class="verify-steps">
+          <li>Open your project at <a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com/dashboard</a>, then <strong>SQL Editor</strong> → <strong>New query</strong>.</li>
+          <li>Paste this query and press <strong>Run</strong>. It only reads settings, never your data.
+            <pre id="database-sql" class="prompt"></pre>
+            <button type="button" class="copy" data-target="database-sql">Copy query</button>
+          </li>
+          <li>Click the single result value in the <code>leakpatrol</code> column, copy it, and paste it here:
+            <label for="database-result" class="visually-hidden">Query result</label>
+            <textarea id="database-result" rows="5" placeholder='{"tables": [...], "policies": [...], ...}'></textarea>
+          </li>
+        </ol>
+        <button type="button" id="database-button" class="buy">Check my database</button>
+        <p id="database-status" class="muted" aria-live="polite"></p>
+        <div id="database-results" hidden>
+          <p id="database-summary"></p>
+          <ol id="database-findings" class="findings"></ol>
+        </div>
+      </div>
+
+      <div id="badge-block" class="progress-card" hidden>
+        <h3>You've earned the badge</h3>
+        <p>Your site scored an A and you've verified you own it. Show your users you take security seriously: add this badge to your site's footer. It links to a page confirming the date of your latest check, and it switches off by itself if your grade drops or the check gets old, so it's always honest.</p>
+        <p><img id="badge-preview" alt="Checked by LeakPatrol: Grade A" height="24"></p>
+        <pre id="badge-code" class="prompt"></pre>
+        <button type="button" class="copy" data-target="badge-code">Copy code</button>
       </div>
     </section>
   </main>

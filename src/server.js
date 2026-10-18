@@ -13,6 +13,8 @@ import { createStore } from './store.js';
 import { paymentsConfig, newReportId, createCheckout, verifySignature, paidOrderFrom, REPORT_ID_RE } from './payments.js';
 import { newVerifyToken, checkOwnership, instructions } from './verify.js';
 import { emailConfig, sendEmail, waitlistWelcome, waitlistAlert, reportReady } from './email.js';
+import { trackProgress, badgeState, badgeSvg } from './progress.js';
+import { DATABASE_SQL, parseDatabaseResult, analyseDatabase } from './sqlcheck.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
@@ -31,6 +33,7 @@ const signupLimit = new RateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 });
 const checkoutLimit = new RateLimiter({ limit: 10, windowMs: 60 * 60 * 1000 });
 const fullScans = new TtlCache(10 * 60 * 1000); // paid reports re-scan at most every 10 minutes
 const verifyLimit = new RateLimiter({ limit: 20, windowMs: 60 * 60 * 1000 });
+const databaseLimit = new RateLimiter({ limit: 30, windowMs: 60 * 60 * 1000 });
 const store = createStore();
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain', '.png': 'image/png', '.xml': 'application/xml; charset=utf-8' };
@@ -57,6 +60,8 @@ export function createServer() {
       if (url.pathname === '/api/webhooks/lemonsqueezy' && req.method === 'POST') return await handleWebhook(req, res);
       if (url.pathname === '/api/report' && req.method === 'GET') return await handleReport(url, res);
       if (url.pathname === '/api/verify' && req.method === 'POST') return await handleVerify(req, res);
+      if (url.pathname === '/api/report/database' && req.method === 'POST') return await handleDatabaseCheck(req, res);
+      if (url.pathname.startsWith('/api/badge/') && req.method === 'GET') return await handleBadge(url, res);
       if (url.pathname === '/api/config' && req.method === 'GET') return sendJson(res, 200, { checkoutAvailable: paymentsConfig().enabled });
       if (url.pathname === '/healthz') return send(res, 200, 'ok', 'text/plain');
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed', 'text/plain');
@@ -229,7 +234,57 @@ async function handleReport(url, res) {
     }
     verification = { verified: false, ...instructions(record.origin, token) };
   }
-  return sendJson(res, 200, { status: 'paid', report: full, verification }, { 'cache-control': 'no-store' });
+  // Progress against the first check, and a badge once a verified owner reaches an A.
+  let progress = null;
+  let badge = null;
+  if (full.reachable) {
+    const tracked = trackProgress(record, full);
+    progress = tracked.progress;
+    const updated = { ...record, ...tracked.updates };
+    if (badgeState(updated).valid) {
+      if (!record.badgeId) {
+        tracked.updates.badgeId = newReportId();
+        await store.create('badges', tracked.updates.badgeId, { reportId: id, createdAt: new Date() });
+      }
+      const badgeId = tracked.updates.badgeId || record.badgeId;
+      const base = paymentsConfig().publicUrl;
+      badge = { page: `${base}/verified.html?b=${badgeId}`, image: `${base}/api/badge/${badgeId}.svg` };
+    }
+    await store.update('reports', id, tracked.updates);
+  }
+  const findings = full.findings.map((f) => ({ ...f, status: progress?.status[`${f.id}|${f.title}`] }));
+  if (progress) delete progress.status;
+  return sendJson(res, 200, { status: 'paid', report: { ...full, findings }, verification, progress, badge, databaseSql: DATABASE_SQL }, { 'cache-control': 'no-store' });
+}
+
+// The buyer pastes the result of DATABASE_SQL from their Supabase SQL editor. Nothing is stored.
+async function handleDatabaseCheck(req, res) {
+  const body = await readJson(req, 512 * 1024);
+  const id = String(body?.id || '');
+  if (!REPORT_ID_RE.test(id)) return sendJson(res, 404, { error: 'Report not found.' });
+  const record = await store.get('reports', id);
+  if (!record || record.status !== 'paid') return sendJson(res, 404, { error: 'Report not found.' });
+  if (!databaseLimit.allow(clientIp(req))) return sendJson(res, 429, { error: 'Too many checks. Please wait a few minutes and try again.' });
+  const db = parseDatabaseResult(body?.result);
+  if (!db) {
+    return sendJson(res, 400, { error: 'That doesn\'t look like the result of our query. Run the whole query, then copy the single value in the "leakpatrol" column and paste it here.' });
+  }
+  const result = analyseDatabase(db);
+  console.log(JSON.stringify({ severity: 'INFO', event: 'database_check', origin: record.origin, tables: result.summary.tables, findings: result.findings.length }));
+  return sendJson(res, 200, result, { 'cache-control': 'no-store' });
+}
+
+// Public: /api/badge/<id>.svg (the image) and /api/badge/<id>.json (for the verification page).
+async function handleBadge(url, res) {
+  const m = url.pathname.match(/^\/api\/badge\/([0-9a-f]{32})\.(svg|json)$/);
+  if (!m) return sendJson(res, 404, { error: 'Badge not found.' });
+  const link = await store.get('badges', m[1]);
+  const record = link && (await store.get('reports', link.reportId));
+  if (!record) return sendJson(res, 404, { error: 'Badge not found.' });
+  const state = badgeState(record);
+  const cache = { 'cache-control': 'public, max-age=3600' };
+  if (m[2] === 'svg') return send(res, 200, badgeSvg(state), 'image/svg+xml', cache);
+  return sendJson(res, 200, { valid: state.valid, grade: state.grade, checkedAt: state.checkedAt, host: new URL(record.origin).host }, cache);
 }
 
 async function handleVerify(req, res) {

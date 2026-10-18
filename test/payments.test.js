@@ -108,12 +108,32 @@ test('buy, pay, and read the full report', async () => {
   const report = await fetch(`${apiUrl}/api/report?id=${reportId}`);
   assert.equal(report.status, 200);
   assert.equal(report.headers.get('cache-control'), 'no-store');
-  const { report: full } = await report.json();
+  const body = await report.json();
+  const { report: full } = body;
   assert.equal(full.score.grade, 'F');
   assert.ok(full.findings.some((f) => f.prompt));
+  // The first open is the starting point for progress tracking.
+  assert.equal(body.progress.first, true);
+  assert.ok(full.findings.filter((f) => f.severity !== 'info').every((f) => f.status === 'open'));
+  assert.match(body.databaseSql, /pg_policies/);
+  assert.equal(body.badge, null, 'no badge for an F');
+
+  // Deep database check from a pasted query result.
+  const pasted = JSON.stringify({ tables: [{ name: 'profiles', rls: false }], policies: [], views: [], functions: [], buckets: [] });
+  const db = await post('/api/report/database', JSON.stringify({ id: reportId, result: pasted }));
+  assert.equal(db.status, 200);
+  const dbBody = await db.json();
+  assert.equal(dbBody.findings[0].title, 'Row Level Security is off on "profiles"');
+  assert.equal((await post('/api/report/database', JSON.stringify({ id: reportId, result: 'hello' }))).status, 400);
+  assert.equal((await post('/api/report/database', JSON.stringify({ id: '0'.repeat(32), result: pasted }))).status, 404);
 
   const md = await fetch(`${apiUrl}/api/report?id=${reportId}&format=md`);
   assert.match(await md.text(), /^# LeakPatrol report/);
+});
+
+test('unknown badges are 404', async () => {
+  assert.equal((await fetch(`${apiUrl}/api/badge/${'a'.repeat(32)}.svg`)).status, 404);
+  assert.equal((await fetch(`${apiUrl}/api/badge/nope.svg`)).status, 404);
 });
 
 test('unknown or malformed report ids are 404', async () => {

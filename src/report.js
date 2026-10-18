@@ -41,12 +41,31 @@ export function toFullReport(report) {
     summary: report.summary,
     usesSupabase: report.usesSupabase,
     deep: Boolean(report.deep),
+    builder: detectBuilder(report.finalUrl),
     scriptsScanned: report.scriptsScanned,
     findings: report.findings.map(({ id, severity, category, title, detail, evidence, fix }) => ({
       id, severity, category, title, detail, evidence, fix, prompt: promptFor({ id, category, title }),
     })),
     headersPrompt: headerTitles.length ? HEADERS_PROMPT(headerTitles) : null,
   };
+}
+
+// Which AI tool built the app, when its hosting address gives it away. Used to word the fix steps.
+const BUILDERS = [
+  [/\.lovable\.app$|\.lovableproject\.com$/, 'Lovable'],
+  [/\.bolt\.host$|\.bolt\.new$/, 'Bolt'],
+  [/\.v0\.app$|\.vusercontent\.net$/, 'v0'],
+  [/\.replit\.app$|\.repl\.co$/, 'Replit'],
+];
+
+export function detectBuilder(url) {
+  let host = '';
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return null;
+  }
+  return BUILDERS.find(([re]) => re.test(host))?.[1] ?? null;
 }
 
 export function renderMarkdown(full) {

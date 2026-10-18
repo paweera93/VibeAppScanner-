@@ -320,6 +320,19 @@ details p { margin: 0 0 18px; color: var(--muted); }
 .prose p, .prose li { color: var(--muted); }
 .prose strong { color: var(--text); }
 
+/* Report: progress, statuses, database check, badge */
+.progress-card { margin: 20px 0; padding: 18px 20px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid var(--border); }
+.progress-card h3 { margin: 0 0 6px; font-size: 1.1rem; }
+.progress-card p { margin: 0 0 8px; }
+.fixed-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; color: var(--muted); }
+.pill.status-open, .pill.status-new { margin-left: 8px; font-size: 0.75rem; font-weight: 600; vertical-align: 2px; }
+.pill.status-open { background: var(--surface-2); color: var(--muted); }
+.pill.status-new { background: var(--accent-soft); color: var(--accent); }
+.help-line { font-size: 0.95rem; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 6px; }
+#database-block { margin-top: 32px; }
+#database-block textarea { width: 100%; margin-top: 8px; font: 0.85rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+#badge-code { white-space: pre-wrap; word-break: break-all; }
+
 /* Guides */
 .guide h3 { font-size: 1.1rem; margin-top: 26px; }
 .guide .crumbs { font-size: 0.9rem; color: var(--muted); margin: 0 0 12px; }
