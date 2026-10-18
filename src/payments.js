@@ -70,7 +70,7 @@ export function verifySignature(rawBody, signature, secret) {
   return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
-// Returns { reportId, orderId, orderNumber, email, testMode } for a paid order, otherwise null.
+// Returns { reportId, orderId, orderNumber, total, email, testMode } for a paid order, otherwise null.
 export function paidOrderFrom(event) {
   if (event?.meta?.event_name !== 'order_created') return null;
   const attrs = event.data?.attributes || {};
@@ -80,6 +80,7 @@ export function paidOrderFrom(event) {
     reportId,
     orderId: String(event.data.id),
     orderNumber: String(attrs.order_number ?? event.data.id),
+    total: attrs.total_formatted || '',
     email: attrs.user_email || '',
     testMode: Boolean(event.meta.test_mode),
   };

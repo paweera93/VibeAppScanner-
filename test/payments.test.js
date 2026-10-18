@@ -65,7 +65,7 @@ function webhook(event, secret = SECRET) {
 
 const orderEvent = (reportId, status = 'paid') => ({
   meta: { event_name: 'order_created', test_mode: true, custom_data: { report_id: reportId } },
-  data: { id: '99', attributes: { status, order_number: 1042, user_email: 'buyer@example.com' } },
+  data: { id: '99', attributes: { status, order_number: 1042, total_formatted: '£9.00', user_email: 'buyer@example.com' } },
 });
 
 test('scan result says checkout is available', async () => {
@@ -101,6 +101,9 @@ test('buy, pay, and read the full report', async () => {
   assert.match(toBuyer[0].text, new RegExp(`/report\\.html\\?id=${reportId}`));
   assert.match(toBuyer[0].text, /#1042/);
   assert.match(toBuyer[0].subject, /^\[TEST\] Your LeakPatrol report/);
+  assert.match(toBuyer[0].html, /Open your report/);
+  assert.match(toBuyer[0].html, /£9\.00/);
+  assert.ok(toBuyer[0].html.includes(`/report.html?id=${reportId}`));
 
   const report = await fetch(`${apiUrl}/api/report?id=${reportId}`);
   assert.equal(report.status, 200);

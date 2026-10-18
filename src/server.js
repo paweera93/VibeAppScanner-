@@ -184,7 +184,7 @@ async function handleWebhook(req, res) {
       if (report.status !== 'paid' && order.email) {
         const reportUrl = `${cfg.publicUrl}/report.html?id=${order.reportId}`;
         try {
-          await sendEmail(emailConfig(), { to: order.email, ...reportReady({ origin: report.origin, reportUrl, orderNumber: order.orderNumber, testMode: order.testMode }) });
+          await sendEmail(emailConfig(), { to: order.email, ...reportReady({ origin: report.origin, reportUrl, orderNumber: order.orderNumber, total: order.total, testMode: order.testMode, logoUrl: `${cfg.publicUrl}/logo.png` }) });
         } catch (err) {
           // The report is already unlocked, and the buyer lands on it after checkout, so a failed email is only logged.
           console.error(JSON.stringify({ severity: 'ERROR', event: 'email_failed', message: String(err?.message || err) }));
