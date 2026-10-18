@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to check if your API key is exposed on your website · LeakPatrol</title>
+  <meta name="description" content="Check whether OpenAI, Stripe, AWS or other secret API keys are visible in your website&#x27;s JavaScript, what each key prefix means, and what to do if one leaked.">
+  <link rel="canonical" href="https://www.getleakpatrol.com/exposed-api-key-check.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="LeakPatrol">
+  <meta property="og:url" content="https://www.getleakpatrol.com/exposed-api-key-check.html">
+  <meta property="og:title" content="How to check if your API key is exposed on your website">
+  <meta property="og:description" content="Check whether OpenAI, Stripe, AWS or other secret API keys are visible in your website&#x27;s JavaScript, what each key prefix means, and what to do if one leaked.">
+  <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How to check if your API key is exposed on your website", "description": "Check whether OpenAI, Stripe, AWS or other secret API keys are visible in your website's JavaScript, what each key prefix means, and what to do if one leaked.", "url": "https://www.getleakpatrol.com/exposed-api-key-check.html", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "author": {"@type": "Person", "name": "Paweera", "jobTitle": "Site Reliability Engineer", "url": "https://www.getleakpatrol.com/about.html"}, "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png"}, "image": "https://www.getleakpatrol.com/og-image.png"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "LeakPatrol", "item": "https://www.getleakpatrol.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://www.getleakpatrol.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "How to check if your API key is exposed on your website", "item": "https://www.getleakpatrol.com/exposed-api-key-check.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I know if my API key is exposed?", "acceptedAnswer": {"@type": "Answer", "text": "Open your live website, go to DevTools, search all JavaScript files for key prefixes such as sk-, sk_live_, AKIA and service_role, or use a free read-only scanner like LeakPatrol."}}, {"@type": "Question", "name": "Is it safe to put an API key in frontend JavaScript?", "acceptedAnswer": {"@type": "Answer", "text": "Only public keys such as Stripe publishable keys or the Supabase anon key. Secret keys must stay on a server, because anything in frontend JavaScript can be read by every visitor."}}, {"@type": "Question", "name": "What should I do if my OpenAI API key was exposed?", "acceptedAnswer": {"@type": "Answer", "text": "Revoke it in the OpenAI dashboard immediately, create a new one, move OpenAI calls to a server-side function, and set a monthly spend limit."}}]}]}</script>
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose guide">
+    <p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>
+    <h1>How to check if your API key is exposed on your website</h1>
+    <p class="byline">By Paweera, Site Reliability Engineer · Updated 18 October 2026</p>
+
+<p class="lead-p">If a secret API key is in your website's JavaScript, anyone can copy it in seconds, and bots scan new sites for exactly that. Here's how to check your own site, what the common key formats look like, and what to do if you find one.</p>
+
+<h2>Check your site in two minutes</h2>
+<ol>
+<li>Open your live website in Chrome, Edge or Firefox.</li>
+<li>Open DevTools (F12, or Cmd+Option+I on a Mac) and go to <strong>Sources</strong>.</li>
+<li>Press Ctrl+Shift+F (Cmd+Option+F on a Mac) to search across all files.</li>
+<li>Search for each of the prefixes below. A secret key should never appear.</li>
+</ol>
+
+<h2>What leaked keys look like</h2>
+<table>
+<thead><tr><th>Service</th><th>Secret key starts with</th><th>Risk</th></tr></thead>
+<tbody>
+<tr><td>OpenAI</td><td><code>sk-proj-</code>, <code>sk-</code></td><td>Usage billed to you</td></tr>
+<tr><td>Anthropic</td><td><code>sk-ant-</code></td><td>Usage billed to you</td></tr>
+<tr><td>Stripe</td><td><code>sk_live_</code>, <code>rk_live_</code></td><td>Refunds, payouts, customer data</td></tr>
+<tr><td>AWS</td><td><code>AKIA</code>, <code>ASIA</code></td><td>Whatever the key can reach</td></tr>
+<tr><td>Supabase</td><td><code>service_role</code> JWT, <code>sb_secret_</code></td><td>Your whole database</td></tr>
+<tr><td>GitHub</td><td><code>ghp_</code>, <code>github_pat_</code></td><td>Your repositories</td></tr>
+<tr><td>Google</td><td><code>AIza</code></td><td>Depends on restrictions</td></tr>
+</tbody>
+</table>
+<p>Some keys are meant to be public: Stripe publishable keys (<code>pk_live_</code>) and the Supabase anon key are fine in the browser.</p>
+
+<h2>Why keys end up in the frontend</h2>
+<p>In apps built with Vite, Next.js or Create React App, environment variables starting with <code>VITE_</code>, <code>NEXT_PUBLIC_</code> or <code>REACT_APP_</code> are bundled into the JavaScript every visitor downloads. AI coding tools often use these prefixes to make a feature work quickly. Other common leaks are a public <code>.env</code> file (try opening <code>yoursite.com/.env</code>) and public source maps.</p>
+
+<h2>If you find a leaked key</h2>
+<ol>
+<li><strong>Rotate it now</strong> in the provider's dashboard. Deleting it from your code is not enough: it's already been downloaded.</li>
+<li><strong>Move the call to a server</strong>, such as a serverless function or Supabase Edge Function, that reads the key from a secret.</li>
+<li><strong>Set a spend limit</strong> for AI providers so a future leak can't run up an unlimited bill.</li>
+<li><strong>Check the provider's usage logs</strong> for anything you don't recognise.</li>
+</ol>
+<p>LeakPatrol does this check automatically: paste your site's address and it searches every JavaScript file it loads for more than 10 kinds of secret key, plus public <code>.env</code> files, <code>.git</code> folders and source maps. It's free and read-only, and any key it finds is masked.</p>
+
+    <div class="guide-cta">
+      <h2>Check your app in a minute</h2>
+      <p>Free, read-only, no sign-up. Every problem comes with a plain-English fix and a prompt for your AI tool.</p>
+      <a class="button" href="/">Scan your app free</a>
+    </div>
+
+    <h2>Questions</h2>
+    <details><summary>How do I know if my API key is exposed?</summary><p>Open your live website, go to DevTools, search all JavaScript files for key prefixes such as sk-, sk_live_, AKIA and service_role, or use a free read-only scanner like LeakPatrol.</p></details>
+    <details><summary>Is it safe to put an API key in frontend JavaScript?</summary><p>Only public keys such as Stripe publishable keys or the Supabase anon key. Secret keys must stay on a server, because anything in frontend JavaScript can be read by every visitor.</p></details>
+    <details><summary>What should I do if my OpenAI API key was exposed?</summary><p>Revoke it in the OpenAI dashboard immediately, create a new one, move OpenAI calls to a server-side function, and set a monthly spend limit.</p></details>
+    <h2>More guides</h2>
+    <ul><li><a href="/lovable-security-check.html">Lovable security check: is your Lovable app safe?</a></li><li><a href="/supabase-security-check.html">Supabase security check: is your anon key safe? (RLS checker)</a></li></ul>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+</body>
+</html>

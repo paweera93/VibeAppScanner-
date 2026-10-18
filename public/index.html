@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LeakPatrol · Is your vibe-coded app safe?</title>
+  <title>Free security scanner for Lovable, Bolt &amp; Cursor apps · LeakPatrol</title>
   <meta name="description" content="Free security check for apps built with Lovable, Bolt, v0, Replit and Cursor. Find leaked API keys, open Supabase settings and missing security headers in a minute.">
   <link rel="canonical" href="https://www.getleakpatrol.com/">
   <link rel="stylesheet" href="/styles.css">
@@ -17,6 +17,7 @@
   <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://www.getleakpatrol.com/og-image.png">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any (web)", "description": "Free, read-only security scanner for apps built with Lovable, Bolt, v0, Replit and Cursor. Finds leaked API keys, Supabase tables without Row Level Security, public .env files and missing security headers, with an A–F grade and fixes you can paste into your AI tool.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP", "description": "Free scan"}, "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png", "email": "hello@getleakpatrol.com", "sameAs": ["https://x.com/leakpatrol", "https://dev.to/leakpatrol"]}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is my Supabase anon key safe in the frontend?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, the anon key is meant to be public. What protects your data is Row Level Security, so every table needs RLS turned on with policies that only let users reach their own rows. The service_role key is different: it must never be in the browser."}}, {"@type": "Question", "name": "How do I check if my API key is exposed on my website?", "acceptedAnswer": {"@type": "Answer", "text": "Paste your site into the scan above, or open DevTools on your live site and search all JavaScript for prefixes like sk-, sk_live_, AKIA and service_role."}}, {"@type": "Question", "name": "Is my Lovable app secure?", "acceptedAnswer": {"@type": "Answer", "text": "Lovable apps often work perfectly while leaking secrets: API keys in VITE_ variables, or Supabase tables without Row Level Security. A free scan shows you in about a minute."}}, {"@type": "Question", "name": "What does LeakPatrol check?", "acceptedAnswer": {"@type": "Answer", "text": "Secret API keys in your JavaScript (OpenAI, Anthropic, Stripe, AWS, GitHub, Supabase service keys and more), automation webhook links, public .env files, .git folders and source maps, security headers and HTTPS, and, once you prove you own the site, which Supabase tables can be read without logging in."}}, {"@type": "Question", "name": "Is it safe to scan my app?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. We only download what any visitor's browser already downloads, plus a short list of files that should never be public. We never log in, submit forms, or change or delete anything."}}, {"@type": "Question", "name": "Do you store my keys or data?", "acceptedAnswer": {"@type": "Answer", "text": "No. If we find a key we show only the first and last few characters, and we never store the full value. Scan results are kept for 10 minutes so repeat scans are quick."}}, {"@type": "Question", "name": "Can I scan someone else's app?", "acceptedAnswer": {"@type": "Answer", "text": "Only scan apps you own or have permission to test. The database check only runs after you prove you own the site."}}, {"@type": "Question", "name": "My app was built with Lovable. Will the fixes work there?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Each fix in the full report comes with a prompt written for AI coding tools, so you can paste it into Lovable, Bolt, v0, Replit, Cursor or Claude Code."}}, {"@type": "Question", "name": "I got an A. Am I completely safe?", "acceptedAnswer": {"@type": "Answer", "text": "An A means none of the common, visible mistakes we look for. It is not a full security audit, so keep following good practice, especially around who can read and change your data."}}]}]}</script>
 </head>
 <body class="home">
   <div class="hero-band">
@@ -26,6 +27,7 @@
         <a href="#how">How it works</a>
         <a href="#checks">What we check</a>
         <a href="#pricing">Pricing</a>
+        <a href="/guides.html">Guides</a>
         <a href="/about.html">About</a>
       </nav>
     </header>
@@ -195,6 +197,22 @@
       <p class="eyebrow">Questions</p>
       <h2>Good to know</h2>
       <details>
+        <summary>Is my Supabase anon key safe in the frontend?</summary>
+        <p>Yes, the anon key is meant to be public. What protects your data is Row Level Security, so every table needs RLS turned on with policies that only let users reach their own rows. The service_role key is different: it must never be in the browser. <a href="/supabase-security-check.html">Supabase security guide</a>.</p>
+      </details>
+      <details>
+        <summary>How do I check if my API key is exposed on my website?</summary>
+        <p>Paste your site into the scan above, or open DevTools on your live site and search all JavaScript for prefixes like sk-, sk_live_, AKIA and service_role. <a href="/exposed-api-key-check.html">How to check for exposed API keys</a>.</p>
+      </details>
+      <details>
+        <summary>Is my Lovable app secure?</summary>
+        <p>Lovable apps often work perfectly while leaking secrets: API keys in VITE_ variables, or Supabase tables without Row Level Security. A free scan shows you in about a minute. <a href="/lovable-security-check.html">Lovable security check</a>.</p>
+      </details>
+      <details>
+        <summary>What does LeakPatrol check?</summary>
+        <p>Secret API keys in your JavaScript (OpenAI, Anthropic, Stripe, AWS, GitHub, Supabase service keys and more), automation webhook links, public .env files, .git folders and source maps, security headers and HTTPS, and, once you prove you own the site, which Supabase tables can be read without logging in.</p>
+      </details>
+      <details>
         <summary>Is it safe to scan my app?</summary>
         <p>Yes. We only download what any visitor's browser already downloads, plus a short list of files that should never be public. We never log in, submit forms, or change or delete anything.</p>
       </details>
@@ -227,7 +245,7 @@
 
   <footer class="site-footer wrap">
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
-    <nav><a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
   </footer>
 
   <script src="/app.js" type="module"></script>

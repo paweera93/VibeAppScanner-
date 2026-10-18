@@ -33,7 +33,7 @@ const fullScans = new TtlCache(10 * 60 * 1000); // paid reports re-scan at most 
 const verifyLimit = new RateLimiter({ limit: 20, windowMs: 60 * 60 * 1000 });
 const store = createStore();
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.txt': 'text/plain', '.png': 'image/png', '.xml': 'application/xml; charset=utf-8' };
 const SECURITY_HEADERS = {
   'content-security-policy': "default-src 'self'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'",
   'x-content-type-options': 'nosniff',

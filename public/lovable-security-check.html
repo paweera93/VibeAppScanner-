@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lovable security check: is your Lovable app safe? · LeakPatrol</title>
+  <meta name="description" content="Free security check for Lovable apps. Find leaked API keys, Supabase tables without Row Level Security, and missing protections, with fixes you can paste back into Lovable.">
+  <link rel="canonical" href="https://www.getleakpatrol.com/lovable-security-check.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="LeakPatrol">
+  <meta property="og:url" content="https://www.getleakpatrol.com/lovable-security-check.html">
+  <meta property="og:title" content="Lovable security check: is your Lovable app safe?">
+  <meta property="og:description" content="Free security check for Lovable apps. Find leaked API keys, Supabase tables without Row Level Security, and missing protections, with fixes you can paste back into Lovable.">
+  <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Lovable security check: is your Lovable app safe?", "description": "Free security check for Lovable apps. Find leaked API keys, Supabase tables without Row Level Security, and missing protections, with fixes you can paste back into Lovable.", "url": "https://www.getleakpatrol.com/lovable-security-check.html", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "author": {"@type": "Person", "name": "Paweera", "jobTitle": "Site Reliability Engineer", "url": "https://www.getleakpatrol.com/about.html"}, "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png"}, "image": "https://www.getleakpatrol.com/og-image.png"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "LeakPatrol", "item": "https://www.getleakpatrol.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://www.getleakpatrol.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "Lovable security check: is your Lovable app safe?", "item": "https://www.getleakpatrol.com/lovable-security-check.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is Lovable secure?", "acceptedAnswer": {"@type": "Answer", "text": "Lovable itself is a reputable platform, but the apps it generates can still contain security mistakes, such as secret API keys in the frontend or Supabase tables without Row Level Security. Each app needs checking."}}, {"@type": "Question", "name": "Is my Supabase anon key safe in a Lovable app?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The anon key is meant to be public. Your data is protected by Row Level Security policies, so check that RLS is on for every table."}}, {"@type": "Question", "name": "How do I check my Lovable app for leaked API keys?", "acceptedAnswer": {"@type": "Answer", "text": "Search your live site's JavaScript in DevTools for key prefixes like sk-, sk_live and service_role, or paste your app's URL into a free read-only scanner like LeakPatrol."}}]}]}</script>
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose guide">
+    <p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>
+    <h1>Lovable security check: is your Lovable app safe?</h1>
+    <p class="byline">By Paweera, Site Reliability Engineer · Updated 18 October 2026</p>
+
+<p class="lead-p">Lovable can turn an idea into a working app in an afternoon. What it can't do is notice when that app quietly hands your secrets to every visitor. This page covers the security problems we see most in Lovable apps, how to check for each one yourself, and how to fix them with a prompt.</p>
+
+<h2>The five problems to check first</h2>
+
+<h3>1. Secret API keys in the frontend</h3>
+<p>Lovable apps are React apps built with Vite. Any environment variable starting with <code>VITE_</code> is bundled into the JavaScript that every visitor downloads. That's fine for public values like your Supabase URL, but if your OpenAI, Stripe or Resend secret key ended up in a <code>VITE_</code> variable, or was pasted straight into a component, anyone can copy it and run up your bill.</p>
+<p><strong>Fix:</strong> move the call into a Supabase Edge Function that reads the key from Supabase secrets, and call that function from the app instead. Then rotate the old key.</p>
+
+<h3>2. Supabase tables without Row Level Security</h3>
+<p>Most Lovable apps use Supabase. The anon key in your app is public by design: what protects your data is Row Level Security (RLS). If a table has RLS off, or a policy like <code>using (true)</code>, anyone can read it, and often change it, without logging in.</p>
+<p><strong>Fix:</strong> ask Lovable to enable RLS on every table and to write policies so each user can only read and change their own rows (for example <code>auth.uid() = user_id</code>).</p>
+
+<h3>3. The Supabase service_role key in the browser</h3>
+<p>The service_role (or <code>sb_secret_</code>) key bypasses every RLS policy. It sometimes gets added to the frontend to make an admin feature work. If it's there, your whole database is open no matter how good your policies are.</p>
+<p><strong>Fix:</strong> rotate it in Supabase (Settings → API) straight away and move admin features into an Edge Function.</p>
+
+<h3>4. Storage buckets anyone can read</h3>
+<p>Supabase Storage has its own policies, separate from your tables. A public bucket is fine for avatars, but not for invoices, ID photos or exports.</p>
+
+<h3>5. Missing security headers on your own domain</h3>
+<p>When you connect a custom domain or export the app to another host, check that it sends basic security headers such as Content-Security-Policy and Strict-Transport-Security. They make whole classes of attack much harder.</p>
+
+<h2>How to check your Lovable app</h2>
+<ol>
+<li>Open your live app, then your browser's DevTools → Sources, and search the JavaScript for <code>sk-</code>, <code>sk_live</code>, <code>service_role</code> and <code>sb_secret_</code>. You should find none.</li>
+<li>In Supabase, open the Table Editor and check every table says RLS is enabled.</li>
+<li>Look through your policies for <code>using (true)</code>.</li>
+<li>In Storage, check which buckets are public.</li>
+</ol>
+<p>Or let LeakPatrol do it from the outside, the way an attacker would see your app. It's free, read-only and takes about a minute. Every problem comes with a prompt you can paste straight back into Lovable.</p>
+
+    <div class="guide-cta">
+      <h2>Check your app in a minute</h2>
+      <p>Free, read-only, no sign-up. Every problem comes with a plain-English fix and a prompt for your AI tool.</p>
+      <a class="button" href="/">Scan your app free</a>
+    </div>
+
+    <h2>Questions</h2>
+    <details><summary>Is Lovable secure?</summary><p>Lovable itself is a reputable platform, but the apps it generates can still contain security mistakes, such as secret API keys in the frontend or Supabase tables without Row Level Security. Each app needs checking.</p></details>
+    <details><summary>Is my Supabase anon key safe in a Lovable app?</summary><p>Yes. The anon key is meant to be public. Your data is protected by Row Level Security policies, so check that RLS is on for every table.</p></details>
+    <details><summary>How do I check my Lovable app for leaked API keys?</summary><p>Search your live site&#x27;s JavaScript in DevTools for key prefixes like sk-, sk_live and service_role, or paste your app&#x27;s URL into a free read-only scanner like LeakPatrol.</p></details>
+    <h2>More guides</h2>
+    <ul><li><a href="/supabase-security-check.html">Supabase security check: is your anon key safe? (RLS checker)</a></li><li><a href="/exposed-api-key-check.html">How to check if your API key is exposed on your website</a></li></ul>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+</body>
+</html>

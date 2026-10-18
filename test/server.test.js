@@ -24,8 +24,19 @@ const postScan = (url, headers = {}) =>
 test('serves the landing page with security headers', async () => {
   const res = await fetch(apiUrl + '/');
   assert.equal(res.status, 200);
-  assert.match(await res.text(), /Is your vibe-coded app safe\?/);
+  assert.match(await res.text(), /Is your vibe-coded app <span class="accent">leaking secrets\?/);
   assert.ok(res.headers.get('content-security-policy'));
+});
+
+test('serves sitemap, robots.txt and llms.txt for search engines', async () => {
+  const sitemap = await fetch(apiUrl + '/sitemap.xml');
+  assert.equal(sitemap.status, 200);
+  assert.match(sitemap.headers.get('content-type'), /xml/);
+  const xml = await sitemap.text();
+  assert.match(xml, /lovable-security-check\.html/);
+  assert.ok(!xml.includes('report.html'), 'private report pages stay out of the sitemap');
+  assert.match(await (await fetch(apiUrl + '/robots.txt')).text(), /Sitemap: https:\/\/www\.getleakpatrol\.com\/sitemap\.xml/);
+  assert.match(await (await fetch(apiUrl + '/llms.txt')).text(), /^# LeakPatrol/);
 });
 
 test('blocks path traversal', async () => {

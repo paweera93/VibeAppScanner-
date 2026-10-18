@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supabase security check: is your anon key safe? (RLS checker) · LeakPatrol</title>
+  <meta name="description" content="Is your Supabase anon key safe in the frontend? Yes, if Row Level Security is on. Check RLS, the service_role key, storage buckets and views, with copy-paste SQL.">
+  <link rel="canonical" href="https://www.getleakpatrol.com/supabase-security-check.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="LeakPatrol">
+  <meta property="og:url" content="https://www.getleakpatrol.com/supabase-security-check.html">
+  <meta property="og:title" content="Supabase security check: is your anon key safe? (RLS checker)">
+  <meta property="og:description" content="Is your Supabase anon key safe in the frontend? Yes, if Row Level Security is on. Check RLS, the service_role key, storage buckets and views, with copy-paste SQL.">
+  <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Is your Supabase anon key safe in the frontend? Yes. Here's what isn't.", "description": "Is your Supabase anon key safe in the frontend? Yes, if Row Level Security is on. Check RLS, the service_role key, storage buckets and views, with copy-paste SQL.", "url": "https://www.getleakpatrol.com/supabase-security-check.html", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "author": {"@type": "Person", "name": "Paweera", "jobTitle": "Site Reliability Engineer", "url": "https://www.getleakpatrol.com/about.html"}, "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png"}, "image": "https://www.getleakpatrol.com/og-image.png"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "LeakPatrol", "item": "https://www.getleakpatrol.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://www.getleakpatrol.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "Supabase security check: is your anon key safe? (RLS checker)", "item": "https://www.getleakpatrol.com/supabase-security-check.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is the Supabase anon key safe to expose?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The anon (or publishable) key is designed to be public. Your data is protected by Row Level Security policies, so it is only safe if RLS is enabled with correct policies on every table."}}, {"@type": "Question", "name": "What happens if Row Level Security is off in Supabase?", "acceptedAnswer": {"@type": "Answer", "text": "Anyone with your anon key, which is visible in your frontend, can read and often modify every row in that table without logging in."}}, {"@type": "Question", "name": "Can the service_role key be used in the browser?", "acceptedAnswer": {"@type": "Answer", "text": "No. The service_role or sb_secret_ key bypasses all Row Level Security. Keep it on a server or in an Edge Function and rotate it if it was ever exposed."}}, {"@type": "Question", "name": "How do I check if RLS is enabled on all my Supabase tables?", "acceptedAnswer": {"@type": "Answer", "text": "Run select tablename, rowsecurity from pg_tables where schemaname = 'public'; in the SQL editor. Any table showing false has RLS off."}}]}]}</script>
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose guide">
+    <p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>
+    <h1>Is your Supabase anon key safe in the frontend? Yes. Here&#x27;s what isn&#x27;t.</h1>
+    <p class="byline">By Paweera, Site Reliability Engineer · Updated 18 October 2026</p>
+
+<p class="lead-p">If you've built an app on Supabase with Lovable, Bolt, v0 or Cursor, you've probably opened DevTools, seen a long <code>eyJ...</code> key in your JavaScript, and felt your stomach drop. Good news first: <strong>that key is supposed to be there.</strong> Here's what it does, and the four things that do leak data in Supabase apps.</p>
+
+<h2>The anon key is public by design</h2>
+<table>
+<thead><tr><th>Key</th><th>Starts with</th><th>Where it belongs</th></tr></thead>
+<tbody>
+<tr><td>anon / publishable</td><td><code>eyJ...</code> (role anon) or <code>sb_publishable_</code></td><td>The browser. Fine to ship.</td></tr>
+<tr><td>service_role / secret</td><td><code>eyJ...</code> (role service_role) or <code>sb_secret_</code></td><td>Only on a server. Never in the browser.</td></tr>
+</tbody>
+</table>
+<p>The anon key only identifies your project. What someone can do with it is decided entirely by your Row Level Security (RLS) policies. <strong>So the anon key is safe only if RLS is doing its job.</strong></p>
+
+<h2>1. Tables with RLS turned off</h2>
+<p>With RLS off, anyone who copies your anon key can read, and often write, the whole table with one request. Check every table in the SQL editor:</p>
+<pre><code>select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public';</code></pre>
+<p>Anything showing <code>false</code> is open. Turn RLS on and add a policy that ties rows to their owner:</p>
+<pre><code>alter table public.profiles enable row level security;
+
+create policy "Users read their own profile"
+on public.profiles for select
+using (auth.uid() = user_id);</code></pre>
+<p>Watch out for policies with <code>using (true)</code>. They switch RLS on but let everyone through.</p>
+
+<h2>2. The service_role key in the browser</h2>
+<p>The service_role (or <code>sb_secret_</code>) key bypasses RLS completely. AI tools sometimes put it in a <code>VITE_</code> or <code>NEXT_PUBLIC_</code> variable to make an admin feature work, and anything with those prefixes is shipped to every visitor. If you find it, rotate it in Supabase (Settings → API) and move the admin work into an Edge Function.</p>
+
+<h2>3. Storage buckets</h2>
+<p>Storage has its own policies on <code>storage.objects</code>, separate from your tables. A public bucket means anyone with a file's URL can download it.</p>
+
+<h2>4. Views and functions that skip RLS</h2>
+<ul>
+<li><strong>Views</strong> run with their creator's rights by default, so a view over a protected table can expose it. On Postgres 15+, create them <code>with (security_invoker = on)</code>.</li>
+<li><strong>Functions marked SECURITY DEFINER</strong> also run with their owner's rights. If one is callable through the API, make sure it only returns what the caller should see.</li>
+</ul>
+
+<h2>The 2-minute check</h2>
+<ol>
+<li>In DevTools → Sources on your live app, search for <code>service_role</code>, <code>sb_secret_</code>, <code>sk-</code> and <code>sk_live</code>. You should find none.</li>
+<li>Run the SQL above. Every table should show <code>true</code>.</li>
+<li>Look for <code>using (true)</code> in your policies.</li>
+<li>Check which storage buckets are public.</li>
+</ol>
+<p>LeakPatrol checks the outside of your app for leaked keys for free, and once you prove you own the site, it also tests which Supabase tables can be read without logging in.</p>
+
+    <div class="guide-cta">
+      <h2>Check your app in a minute</h2>
+      <p>Free, read-only, no sign-up. Every problem comes with a plain-English fix and a prompt for your AI tool.</p>
+      <a class="button" href="/">Scan your app free</a>
+    </div>
+
+    <h2>Questions</h2>
+    <details><summary>Is the Supabase anon key safe to expose?</summary><p>Yes. The anon (or publishable) key is designed to be public. Your data is protected by Row Level Security policies, so it is only safe if RLS is enabled with correct policies on every table.</p></details>
+    <details><summary>What happens if Row Level Security is off in Supabase?</summary><p>Anyone with your anon key, which is visible in your frontend, can read and often modify every row in that table without logging in.</p></details>
+    <details><summary>Can the service_role key be used in the browser?</summary><p>No. The service_role or sb_secret_ key bypasses all Row Level Security. Keep it on a server or in an Edge Function and rotate it if it was ever exposed.</p></details>
+    <details><summary>How do I check if RLS is enabled on all my Supabase tables?</summary><p>Run select tablename, rowsecurity from pg_tables where schemaname = &#x27;public&#x27;; in the SQL editor. Any table showing false has RLS off.</p></details>
+    <h2>More guides</h2>
+    <ul><li><a href="/lovable-security-check.html">Lovable security check: is your Lovable app safe?</a></li><li><a href="/exposed-api-key-check.html">How to check if your API key is exposed on your website</a></li></ul>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+</body>
+</html>

@@ -320,6 +320,24 @@ details p { margin: 0 0 18px; color: var(--muted); }
 .prose p, .prose li { color: var(--muted); }
 .prose strong { color: var(--text); }
 
+/* Guides */
+.guide h3 { font-size: 1.1rem; margin-top: 26px; }
+.guide .crumbs { font-size: 0.9rem; color: var(--muted); margin: 0 0 12px; }
+.guide .crumbs a { color: var(--muted); }
+.guide .byline { font-size: 0.9rem; color: var(--muted); margin: -4px 0 28px; }
+.guide .lead-p { font-size: 1.15rem; color: var(--text); }
+.guide table { width: 100%; border-collapse: collapse; margin: 16px 0 8px; font-size: 0.95rem; display: block; overflow-x: auto; }
+.guide th, .guide td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.guide th { color: var(--text); background: var(--surface-2); }
+.guide td { color: var(--muted); }
+.guide pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
+.guide pre code { overflow-wrap: normal; }
+.guide-cta { margin: 40px 0 8px; padding: 24px; border-radius: var(--radius); background: var(--hero-bg); color: var(--hero-text); }
+.guide-cta h2 { margin-top: 0; color: var(--hero-text); }
+.guide-cta p { color: var(--hero-muted); }
+.guide-cta .button { background: var(--hero-accent); color: #0b0e1a; }
+.guide-list { padding-left: 0; list-style: none; display: grid; gap: 18px; }
+
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;

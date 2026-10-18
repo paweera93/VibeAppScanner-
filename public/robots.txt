@@ -1,2 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /report.html
+Disallow: /api/
+
+Sitemap: https://www.getleakpatrol.com/sitemap.xml

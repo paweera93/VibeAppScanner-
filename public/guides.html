@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security guides for AI-built apps · LeakPatrol</title>
+  <meta name="description" content="Practical security guides for apps built with Lovable, Bolt, v0, Replit and Cursor: leaked API keys, Supabase Row Level Security and more.">
+  <link rel="canonical" href="https://www.getleakpatrol.com/guides.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="LeakPatrol">
+  <meta property="og:url" content="https://www.getleakpatrol.com/guides.html">
+  <meta property="og:title" content="Security guides for AI-built apps">
+  <meta property="og:description" content="Practical security guides for apps built with Lovable, Bolt, v0, Replit and Cursor: leaked API keys, Supabase Row Level Security and more.">
+  <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Security guides for AI-built apps", "url": "https://www.getleakpatrol.com/guides.html", "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png"}}</script>
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose guide">
+    <p class="crumbs"><a href="/">LeakPatrol</a></p>
+    <h1>Security guides for AI-built apps</h1>
+    <p class="byline">By Paweera, Site Reliability Engineer · Updated 18 October 2026</p>
+
+    <p>Short, practical guides to the security mistakes AI coding tools make most, written by a Site Reliability Engineer.</p>
+    <ul class="guide-list">
+    <li><a href="/lovable-security-check.html"><strong>Lovable security check: is your Lovable app safe?</strong></a><br>Free security check for Lovable apps. Find leaked API keys, Supabase tables without Row Level Security, and missing protections, with fixes you can paste back into Lovable.</li>
+    <li><a href="/supabase-security-check.html"><strong>Supabase security check: is your anon key safe? (RLS checker)</strong></a><br>Is your Supabase anon key safe in the frontend? Yes, if Row Level Security is on. Check RLS, the service_role key, storage buckets and views, with copy-paste SQL.</li>
+    <li><a href="/exposed-api-key-check.html"><strong>How to check if your API key is exposed on your website</strong></a><br>Check whether OpenAI, Stripe, AWS or other secret API keys are visible in your website&#x27;s JavaScript, what each key prefix means, and what to do if one leaked.</li>
+    </ul>
+    <div class="guide-cta">
+      <h2>Check your app in a minute</h2>
+      <p>Free, read-only, no sign-up.</p>
+      <a class="button" href="/">Scan your app free</a>
+    </div>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+</body>
+</html>
