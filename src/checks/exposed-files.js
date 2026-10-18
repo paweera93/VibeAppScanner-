@@ -23,11 +23,20 @@ const PROBES = [
     looksReal: (b) => /\[core\]/.test(b) && !/<html/i.test(b),
     fix: 'Block /.git at your web server or host and make sure the deploy does not upload it.',
   },
+  // Some hosts block /.git/config but still serve HEAD. One .git finding is enough.
+  {
+    path: '/.git/HEAD',
+    id: 'exposed-git',
+    onlyIfNew: true,
+    looksReal: (b) => /^(?:ref: refs\/\S+|[0-9a-f]{40})\s*$/.test(b),
+  },
 ];
 
-// Inherit validators/fixes from the first probe with the same id.
+// Inherit severity, title, validator and fix from the first probe with the same id.
 for (const p of PROBES) {
   const base = PROBES.find((q) => q.id === p.id);
+  p.severity ??= base.severity;
+  p.title ??= base.title;
   p.looksReal ??= base.looksReal;
   p.fix ??= base.fix;
 }
@@ -35,6 +44,7 @@ for (const p of PROBES) {
 export async function checkExposedFiles(origin) {
   const findings = [];
   for (const probe of PROBES) {
+    if (probe.onlyIfNew && findings.some((f) => f.id === probe.id)) continue;
     const res = await get(origin + probe.path, { maxBytes: 64 * 1024 });
     if (!res.ok || res.status !== 200) continue;
     if (!probe.looksReal(res.body)) continue;

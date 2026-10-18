@@ -2,6 +2,8 @@
 // These are the main thing the full report adds: each finding becomes an instruction
 // the person can paste straight into the tool that built their app.
 
+const AI_KEYS = new Set(['openai-key', 'anthropic-key', 'google-ai-key']);
+
 const SECRET_PROMPT = (f) =>
   `My app's front-end JavaScript contains a secret: ${f.title.replace(' is visible in your JavaScript', '')}. ` +
   `Anyone who opens the site can read it. Please:\n` +
@@ -10,7 +12,8 @@ const SECRET_PROMPT = (f) =>
   `that reads the key from an environment variable or secret, never from code.\n` +
   `3. Change the front-end to call that function instead.\n` +
   `4. Make sure no environment variable holding this key starts with VITE_, NEXT_PUBLIC_ or REACT_APP_, because those are bundled into the browser.\n` +
-  `Do not print the key in your reply. I will rotate the old key myself after this change.`;
+  `Do not print the key in your reply. I will rotate the old key myself after this change.` +
+  (AI_KEYS.has(f.id) ? ` Remind me to set a monthly spend limit in the provider's dashboard as well.` : '');
 
 const PROMPTS = {
   'supabase-service-key': () =>
@@ -43,6 +46,13 @@ const PROMPTS = {
     `In my Supabase project anyone can sign up without confirming their email. Please list every RLS policy that grants access ` +
     `to the "authenticated" role without also checking auth.uid() against the row's owner, and rewrite each one so users can only ` +
     `reach their own rows. Then remind me to turn on "Confirm email" in Authentication > Providers > Email.`,
+  'automation-webhook': () =>
+    `My app's front-end JavaScript contains an automation webhook URL (n8n, Make, Zapier or Pipedream). Anyone who opens the site ` +
+    `can copy it and trigger the workflow with any data. Please:\n` +
+    `1. Move the call into a server-side function (for example a Supabase Edge Function or an API route) that reads the webhook URL from a secret.\n` +
+    `2. In that function, check the user is allowed to do this and validate the data before forwarding it.\n` +
+    `3. Add a secret header to the request and tell me how to make the workflow reject requests without it.\n` +
+    `Do not print the webhook URL in your reply. I will replace it with a new one after this change.`,
   'exposed-env': () =>
     `My site serves its .env file publicly. Please make sure no .env file is inside the public/ or static folder, ` +
     `add .env* to .gitignore, and add a rule at the host that returns 404 for any path starting with /.env. ` +

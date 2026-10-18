@@ -11,6 +11,7 @@ const jwt = (role) =>
 const SUPABASE_URL = 'https://abcdefghijklmnopqrst.supabase.co';
 const FAKE_OPENAI = ['sk', 'proj', 'TESTONLYabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKL'].join('-');
 const FAKE_STRIPE = ['sk', 'live', 'TESTONLY1234567890abcdefgh'].join('_');
+const FAKE_ZAPIER = ['https://hooks.zapier.com/hooks/catch', '1234567', 'testonly9'].join('/');
 
 const SPA_HTML = (script) =>
   `<!doctype html><html><head><title>Demo</title><script type="module" crossorigin src="${script}"></script></head><body><div id="root"></div></body></html>`;
@@ -28,9 +29,11 @@ export const APPS = {
         `//# sourceMappingURL=index-a1b2c3d4.js.map\n`,
       '/assets/Dashboard-e5f6a7b8.js':
         `const openai = new OpenAI({ apiKey: "${FAKE_OPENAI}", dangerouslyAllowBrowser: true });\n` +
-        `const stripe = "${FAKE_STRIPE}";\n`,
+        `const stripe = "${FAKE_STRIPE}";\n` +
+        `const notify = (b) => fetch("${FAKE_ZAPIER}/", { method: "POST", body: b });\n`,
       '/assets/index-a1b2c3d4.js.map': '{"version":3,"sources":["src/App.tsx"],"mappings":""}',
       '/.env': 'SUPABASE_SERVICE_ROLE_KEY=test-only\nOPENAI_API_KEY=test-only\n',
+      '/.git/HEAD': 'ref: refs/heads/main\n',
     },
     // Unknown paths fall back to index.html, like a real SPA host.
     spaFallback: true,

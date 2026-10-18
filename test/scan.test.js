@@ -16,7 +16,7 @@ test('broken demo app: finds every planted problem', async () => {
   const r = await scanApp('broken');
   const ids = new Set(r.findings.map((f) => f.id));
 
-  for (const id of ['openai-key', 'stripe-secret', 'supabase-service-key', 'supabase-detected', 'exposed-env', 'public-source-map', 'missing-csp', 'no-https', 'cookie-flags', 'x-powered-by']) {
+  for (const id of ['openai-key', 'stripe-secret', 'supabase-service-key', 'supabase-detected', 'exposed-env', 'exposed-git', 'automation-webhook', 'public-source-map', 'missing-csp', 'no-https', 'cookie-flags', 'x-powered-by']) {
     assert.ok(ids.has(id), `expected finding ${id}, got ${[...ids].join(', ')}`);
   }
   assert.equal(r.usesSupabase, true);
@@ -30,6 +30,7 @@ test('broken demo app: secrets are masked in the report', async () => {
   const text = JSON.stringify(r);
   assert.ok(!text.includes('TESTONLYabcdefghijklmnopqrstuvwxyz'), 'full OpenAI key must not appear');
   assert.ok(!text.includes('TESTONLY1234567890abcdefgh'), 'full Stripe key must not appear');
+  assert.ok(!text.includes('1234567/testonly9'), 'full webhook URL must not appear');
 });
 
 test('clean demo app: anon key alone is not flagged as a leak', async () => {
@@ -37,6 +38,7 @@ test('clean demo app: anon key alone is not flagged as a leak', async () => {
   const ids = r.findings.map((f) => f.id);
   assert.ok(!ids.includes('supabase-service-key'));
   assert.ok(!ids.includes('exposed-env'), 'SPA fallback for /.env must not be reported');
+  assert.ok(!ids.includes('exposed-git'), 'SPA fallback for /.git/HEAD must not be reported');
   assert.ok(!ids.includes('missing-csp'));
   assert.ok(ids.includes('supabase-detected'));
   assert.equal(r.summary.critical, 0);
@@ -70,6 +72,8 @@ test('full report gives every finding a fix and AI prompts', async () => {
     assert.ok(full.findings.every((f) => f.fix));
     const secret = full.findings.find((f) => f.category === 'secrets');
     assert.match(secret.prompt, /server-side function/);
+    assert.match(full.findings.find((f) => f.id === 'openai-key').prompt, /spend limit/);
+    assert.match(full.findings.find((f) => f.id === 'automation-webhook').prompt, /secret header/);
     assert.ok(full.headersPrompt.includes('Content-Security-Policy'));
     const md = renderMarkdown(full);
     assert.match(md, /^# LeakPatrol report/);
