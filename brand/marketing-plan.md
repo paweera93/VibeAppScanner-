@@ -11,7 +11,7 @@ Over the 3 days since launch (page views and scans include our own testing):
 |---|---|
 | Page views | ~480 |
 | Scans | 21 |
-| Email sign-ups from real visitors | 0 or 1 (the other 7 were our own tests) |
+| Email sign-ups from real visitors | 0 (all 8 so far were our own tests) |
 | Visits from X | 2 (both on 18 Oct, after the first replies) |
 
 Every link we share carries `?ref=<channel>`, so the page-view logs show which channel works.
