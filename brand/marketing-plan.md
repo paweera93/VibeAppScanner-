@@ -69,6 +69,19 @@ Server notes (Discord account "LeakPatrol", created 18 Oct, signed in on Browser
 | Supabase | not yet | check rules |
 | Bolt | not yet | get the invite from bolt.new itself |
 
+## This week
+
+| When | What | Who |
+|---|---|---|
+| Mon 19 Oct | X Day 3 post with image + replies; final read of the Show HN draft | Claude, you approve |
+| Tue 20 Oct, ~14:00 UK | **Show HN** (draft above); stay 2–3 hours for comments | You post, Claude helps with answers |
+| This week | dev.to article `brand/articles/01-supabase-anon-key.md` (publish under your account; set `published: true`) | You publish |
+| Daily | X tips, replies, "drop your project" threads | Claude, you approve |
+
+Site prepared for a spike: Cloud Run max instances raised from 3 to 10 (18 Oct).
+
+Discord: low value for promotion (the big servers ban it). Keep the account; no planned effort.
+
 ## Weekly rhythm
 
 | When | What |
