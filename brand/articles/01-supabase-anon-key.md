@@ -1,9 +1,9 @@
 ---
 title: Is your Supabase anon key safe in the frontend? Yes. Here's what isn't.
-published: false
+published: true
 description: The anon key is meant to be public. Row Level Security, the service_role key, storage buckets and views are where AI-built apps actually leak.
 tags: supabase, security, webdev, ai
-canonical_url:
+canonical_url: https://dev.to/leakpatrol/is-your-supabase-anon-key-safe-in-the-frontend-yes-heres-what-isnt-5919
 ---
 
 If you've built an app with Lovable, Bolt, v0 or Cursor on top of Supabase, you've probably opened DevTools, seen a long `eyJ...` key in your JavaScript, and felt your stomach drop.
