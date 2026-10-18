@@ -12,7 +12,7 @@ import { addToWaitlist, normaliseEmail } from './waitlist.js';
 import { createStore } from './store.js';
 import { paymentsConfig, newReportId, createCheckout, verifySignature, paidOrderFrom, REPORT_ID_RE } from './payments.js';
 import { newVerifyToken, checkOwnership, instructions } from './verify.js';
-import { emailConfig, sendEmail, waitlistWelcome, waitlistAlert } from './email.js';
+import { emailConfig, sendEmail, waitlistWelcome, waitlistAlert, reportReady } from './email.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const PORT = Number(process.env.PORT || 8080);
@@ -177,9 +177,19 @@ async function handleWebhook(req, res) {
     const report = await store.get('reports', order.reportId);
     if (report) {
       await store.update('reports', order.reportId, {
-        status: 'paid', paidAt: new Date(), orderId: order.orderId, email: order.email, testMode: order.testMode,
+        status: 'paid', paidAt: new Date(), orderId: order.orderId, orderNumber: order.orderNumber, email: order.email, testMode: order.testMode,
       });
       console.log(JSON.stringify({ severity: 'INFO', event: 'report_paid', origin: report.origin, testMode: order.testMode }));
+      // Email the report link once. Lemon Squeezy retries webhooks, so skip reports that were already paid.
+      if (report.status !== 'paid' && order.email) {
+        const reportUrl = `${cfg.publicUrl}/report.html?id=${order.reportId}`;
+        try {
+          await sendEmail(emailConfig(), { to: order.email, ...reportReady({ origin: report.origin, reportUrl, orderNumber: order.orderNumber, testMode: order.testMode }) });
+        } catch (err) {
+          // The report is already unlocked, and the buyer lands on it after checkout, so a failed email is only logged.
+          console.error(JSON.stringify({ severity: 'ERROR', event: 'email_failed', message: String(err?.message || err) }));
+        }
+      }
     } else {
       console.log(JSON.stringify({ severity: 'WARNING', event: 'webhook_unknown_report', orderId: order.orderId }));
     }

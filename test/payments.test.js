@@ -6,8 +6,9 @@ import { createHmac } from 'node:crypto';
 import { APPS, serve } from './demo-apps.js';
 
 const SECRET = 'whsec_test';
-let api, apiUrl, demo, demoUrl, fakeLs;
+let api, apiUrl, demo, demoUrl, fakeLs, fakeResend;
 const checkoutRequests = [];
+const sentEmails = [];
 
 before(async () => {
   fakeLs = http.createServer((req, res) => {
@@ -20,7 +21,18 @@ before(async () => {
     });
   });
   await new Promise((r) => fakeLs.listen(0, '127.0.0.1', r));
+  fakeResend = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      sentEmails.push(JSON.parse(body));
+      res.writeHead(200, { 'content-type': 'application/json' }).end('{"id":"1"}');
+    });
+  });
+  await new Promise((r) => fakeResend.listen(0, '127.0.0.1', r));
   Object.assign(process.env, {
+    RESEND_API_KEY: 're_test',
+    RESEND_API_BASE: `http://127.0.0.1:${fakeResend.address().port}`,
     ALLOW_PRIVATE_TARGETS: '1',
     PAYMENTS_ENABLED: '1',
     LEMONSQUEEZY_API_BASE: `http://127.0.0.1:${fakeLs.address().port}`,
@@ -40,6 +52,7 @@ after(() => {
   api.close();
   demo.close();
   fakeLs.close();
+  fakeResend.close();
 });
 
 const post = (path, body, headers = {}) =>
@@ -52,7 +65,7 @@ function webhook(event, secret = SECRET) {
 
 const orderEvent = (reportId, status = 'paid') => ({
   meta: { event_name: 'order_created', test_mode: true, custom_data: { report_id: reportId } },
-  data: { id: '99', attributes: { status, user_email: 'buyer@example.com' } },
+  data: { id: '99', attributes: { status, order_number: 1042, user_email: 'buyer@example.com' } },
 });
 
 test('scan result says checkout is available', async () => {
@@ -81,6 +94,14 @@ test('buy, pay, and read the full report', async () => {
   assert.equal((await fetch(`${apiUrl}/api/report?id=${reportId}`)).status, 202);
 
   assert.equal((await webhook(orderEvent(reportId))).status, 200);
+  // The buyer gets one email with their report link and order number, even if the webhook is retried.
+  assert.equal((await webhook(orderEvent(reportId))).status, 200);
+  const toBuyer = sentEmails.filter((e) => e.to[0] === 'buyer@example.com');
+  assert.equal(toBuyer.length, 1);
+  assert.match(toBuyer[0].text, new RegExp(`/report\\.html\\?id=${reportId}`));
+  assert.match(toBuyer[0].text, /#1042/);
+  assert.match(toBuyer[0].subject, /^\[TEST\] Your LeakPatrol report/);
+
   const report = await fetch(`${apiUrl}/api/report?id=${reportId}`);
   assert.equal(report.status, 200);
   assert.equal(report.headers.get('cache-control'), 'no-store');

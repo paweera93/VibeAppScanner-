@@ -52,3 +52,16 @@ export const waitlistAlert = (email) => ({
   subject: `New waitlist sign-up: ${email}`,
   text: `${email} joined the LeakPatrol waitlist at ${new Date().toISOString()}.\n`,
 });
+
+// Sent to the buyer once the payment webhook arrives. The report link is the only key to a paid
+// report, so this email is how buyers get back to it later.
+export const reportReady = ({ origin, reportUrl, orderNumber, testMode }) => ({
+  subject: `${testMode ? '[TEST] ' : ''}Your LeakPatrol report for ${new URL(origin).host}`,
+  text:
+    `Thanks for your order (#${orderNumber}).\n\n` +
+    `Your full report for ${origin} is here:\n${reportUrl}\n\n` +
+    `Keep this email: the link above is how you get back to your report. Anyone with the link can open it, so share it carefully.\n\n` +
+    `The report re-checks your site every time you open it, so after you apply a fix, open it again to see your new grade.\n\n` +
+    `Questions, or a fix that didn't work? Just reply to this email.\n\n` +
+    `LeakPatrol\n`,
+});

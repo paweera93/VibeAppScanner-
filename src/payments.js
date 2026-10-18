@@ -70,11 +70,17 @@ export function verifySignature(rawBody, signature, secret) {
   return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
-// Returns { reportId, orderId, email, testMode } for a paid order, otherwise null.
+// Returns { reportId, orderId, orderNumber, email, testMode } for a paid order, otherwise null.
 export function paidOrderFrom(event) {
   if (event?.meta?.event_name !== 'order_created') return null;
   const attrs = event.data?.attributes || {};
   const reportId = event.meta.custom_data?.report_id;
   if (attrs.status !== 'paid' || !REPORT_ID_RE.test(reportId || '')) return null;
-  return { reportId, orderId: String(event.data.id), email: attrs.user_email || '', testMode: Boolean(event.meta.test_mode) };
+  return {
+    reportId,
+    orderId: String(event.data.id),
+    orderNumber: String(attrs.order_number ?? event.data.id),
+    email: attrs.user_email || '',
+    testMode: Boolean(event.meta.test_mode),
+  };
 }
