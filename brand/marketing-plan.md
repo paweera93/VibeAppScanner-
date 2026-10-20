@@ -74,7 +74,7 @@ Server notes (Discord account "LeakPatrol", created 18 Oct, signed in on Browser
 | When | What | Who |
 |---|---|---|
 | Mon 19 Oct | X Day 3 post with image + replies; final read of the Show HN draft | Claude, you approve |
-| Tue 20 Oct, ~14:00 UK | **Show HN** (draft above); stay 2–3 hours for comments | You post, Claude helps with answers |
+| Tue 20 Oct, ~14:00 UK | **Show HN: blocked.** HN is temporarily restricting Show HN for new accounts ("become a good contributor first"). Owner builds karma by genuinely taking part (HN doesn't want AI-written comments), then posts Show HN in a few weeks. | Owner |
 | This week | dev.to article `brand/articles/01-supabase-anon-key.md` (publish under your account; set `published: true`) | You publish |
 | Daily | X tips, replies, "drop your project" threads | Claude, you approve |
 
