@@ -199,7 +199,7 @@ HEADER = """<!doctype html>
   <main class="prose guide">
     <p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>
     <h1>{h1}</h1>
-    <p class="byline">By Paweera, Site Reliability Engineer · Updated {updated}</p>
+    <p class="byline">By LeakPatrol · Updated {updated}</p>
 """
 
 FOOTER = """
@@ -220,7 +220,7 @@ FOOTER = """
 </html>
 """
 
-AUTHOR = {'@type': 'Person', 'name': 'Paweera', 'jobTitle': 'Site Reliability Engineer', 'url': SITE + '/about.html'}
+AUTHOR = {'@type': 'Organization', 'name': 'LeakPatrol', 'url': SITE + '/about.html'}
 PUBLISHER = {'@type': 'Organization', 'name': 'LeakPatrol', 'url': SITE + '/', 'logo': SITE + '/logo.png'}
 
 
@@ -260,7 +260,7 @@ def build_index():
                          jsonld=json.dumps({'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': 'Security guides for AI-built apps', 'url': SITE + '/guides.html', 'publisher': PUBLISHER}))
     page = page.replace('<p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>', '<p class="crumbs"><a href="/">LeakPatrol</a></p>')
     page += f"""
-    <p>Short, practical guides to the security mistakes AI coding tools make most, written by a Site Reliability Engineer.</p>
+    <p>Short, practical guides to the security mistakes AI coding tools make most.</p>
     <ul class="guide-list">
 {items}
     </ul>
