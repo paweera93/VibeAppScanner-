@@ -39,3 +39,13 @@ test('Firestore store get returns null for missing docs and surfaces real errors
   status = 403;
   await assert.rejects(store.get('reports', 'x'), /403/);
 });
+
+test('existing sign-ups can get the checklist again, at most once a day', async () => {
+  const { MemoryStore } = await import('../src/store.js');
+  const { addToWaitlist, claimResend, RESEND_AFTER_MS } = await import('../src/waitlist.js');
+  const store = new MemoryStore();
+  assert.equal(await addToWaitlist(store, 'a@b.com', 'home'), true);
+  assert.equal(await claimResend(store, 'a@b.com', new Date(Date.now() + 1000)), false, 'just signed up');
+  assert.equal(await claimResend(store, 'a@b.com', new Date(Date.now() + RESEND_AFTER_MS + 1000)), true);
+  assert.equal(await claimResend(store, 'a@b.com', new Date(Date.now() + RESEND_AFTER_MS + 2000)), false, 'once a day');
+});

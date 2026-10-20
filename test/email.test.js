@@ -48,7 +48,7 @@ test('a new sign-up gets a confirmation and the owner gets an alert, once', asyn
   assert.equal(welcome.auth, 'Bearer re_test');
   assert.match(alert.subject, /maker@example\.com/);
 
-  // Signing up again sends nothing.
+  // Signing up again the same day sends nothing more.
   assert.equal((await signup('maker@example.com')).status, 200);
   assert.equal(sent.length, 2);
 });

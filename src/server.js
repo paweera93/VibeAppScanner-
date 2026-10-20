@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { scan, normaliseTarget } from './scan.js';
 import { toFreeReport, toFullReport, renderMarkdown } from './report.js';
 import { RateLimiter, TtlCache } from './limits.js';
-import { addToWaitlist, normaliseEmail } from './waitlist.js';
+import { addToWaitlist, claimResend, normaliseEmail } from './waitlist.js';
 import { createStore } from './store.js';
 import { paymentsConfig, newReportId, createCheckout, verifySignature, paidOrderFrom, REPORT_ID_RE } from './payments.js';
 import { newVerifyToken, checkOwnership, instructions } from './verify.js';
@@ -128,13 +128,16 @@ async function handleWaitlist(req, res) {
   const source = /^[a-z0-9-]{1,60}$/.test(String(body?.source || '')) ? body.source : 'results';
   const isNew = await addToWaitlist(store, email, source);
   console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup', isNew, source }));
-  if (isNew) {
+  // New sign-ups get the checklist and the owner gets an alert. Existing ones get the checklist again
+  // (at most daily), because people sign up again when they can't find the first email.
+  const resend = !isNew && (await claimResend(store, email));
+  if (isNew || resend) {
     // Sent before replying: Cloud Run may pause the container once the response is out.
     // A failed email is logged but never fails the sign-up, which is already saved.
     const cfg = emailConfig();
     const results = await Promise.allSettled([
       sendEmail(cfg, { to: email, ...waitlistWelcome() }),
-      sendEmail(cfg, { to: cfg.notify, ...waitlistAlert(email, source) }),
+      ...(isNew ? [sendEmail(cfg, { to: cfg.notify, ...waitlistAlert(email, source) })] : []),
     ]);
     for (const r of results) {
       if (r.status === 'rejected') console.error(JSON.stringify({ severity: 'ERROR', event: 'email_failed', message: String(r.reason?.message || r.reason) }));

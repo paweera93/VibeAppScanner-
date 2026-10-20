@@ -16,7 +16,8 @@ for (const form of document.querySelectorAll('form[data-signup]')) {
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
         form.hidden = true;
-        status.textContent = 'Sent! Check your inbox (and the Promotions or Updates tab) for the checklist.';
+        status.classList.add('signup-done');
+        status.textContent = '✓ Sent! Check your inbox for the checklist. It can take a minute, and may land in Promotions or Updates.';
       } else {
         status.textContent = body.error || 'Something went wrong. Please try again.';
         button.disabled = false;

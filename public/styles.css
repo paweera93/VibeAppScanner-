@@ -105,6 +105,9 @@ h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1.05; margin: 0 0 20px;
 .lead { font-size: 1.15rem; color: var(--hero-muted); margin: 0 0 32px; max-width: 34em; }
 
 .scan-form { display: flex; gap: 8px; flex-wrap: wrap; }
+/* The hidden attribute must win over display rules like the one above. */
+[hidden] { display: none !important; }
+.signup-done { font-size: 1rem; font-weight: 600; color: var(--good); }
 .scan-form input {
   flex: 1 1 240px; min-width: 0;
   padding: 14px 16px; font: inherit;

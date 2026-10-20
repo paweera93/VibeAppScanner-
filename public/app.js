@@ -162,7 +162,8 @@ waitlistForm.addEventListener('submit', async (e) => {
     const body = await res.json();
     if (res.ok) {
       waitlistForm.hidden = true;
-      waitlistStatus.textContent = 'Sent! Check your inbox (and the Promotions or Updates tab) for the checklist.';
+      waitlistStatus.classList.add('signup-done');
+      waitlistStatus.textContent = '✓ Sent! Check your inbox for the checklist. It can take a minute, and may land in Promotions or Updates.';
     } else {
       waitlistStatus.textContent = body.error || 'Something went wrong. Please try again.';
     }
