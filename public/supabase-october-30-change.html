@@ -77,7 +77,23 @@ group by table_name;</code></pre>
     <div class="guide-cta">
       <h2>Check your app in a minute</h2>
       <p>Free, read-only, no sign-up. Every problem comes with a plain-English fix and a prompt for your AI tool.</p>
-      <a class="button" href="/">Scan your app free</a>
+      <form class="scan-form" action="/" method="get">
+        <label for="guide-url" class="visually-hidden">Your app's address</label>
+        <input id="guide-url" name="url" type="text" inputmode="url" placeholder="myapp.lovable.app" required>
+        <input type="hidden" name="ref" value="guide-supabase-october-30-change">
+        <button type="submit">Scan free</button>
+      </form>
+    </div>
+    <div class="signup-box">
+      <h2>Get the 10-point checklist</h2>
+      <p>Every check we run on AI-built apps, with how to do each one yourself. Straight to your inbox.</p>
+      <form class="scan-form" data-signup data-source="guide-supabase-october-30-change" novalidate>
+        <label for="guide-email" class="visually-hidden">Your email</label>
+        <input id="guide-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit">Email me the checklist</button>
+      </form>
+      <p class="fine-print signup-status" aria-live="polite">Plus an email when automatic re-checks launch, and the odd tip. Unsubscribe any time.</p>
     </div>
 
     <h2>Questions</h2>
@@ -91,5 +107,6 @@ group by table_name;</code></pre>
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
     <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
   </footer>
+  <script src="/signup.js" type="module"></script>
 </body>
 </html>

@@ -35,22 +35,62 @@ export async function sendEmail(cfg, { to, subject, text, html }) {
   }
 }
 
+// The lead magnet: everyone who signs up gets the checklist straight away.
+const CHECKLIST = [
+  ['No secret keys in your JavaScript', 'Open your live site, DevTools → Sources, search all files for sk-, sk_live, service_role, sb_secret_ and AKIA. You should find none.'],
+  ['No secrets in VITE_, NEXT_PUBLIC_ or REACT_APP_ variables', 'Anything with those prefixes is bundled into the code every visitor downloads. Secret keys belong in a server function.'],
+  ['Row Level Security on every Supabase table', "In the SQL editor: select tablename, rowsecurity from pg_tables where schemaname = 'public'; Every row should say true."],
+  ['No "using (true)" policies on private data', 'They switch RLS on but let everyone through. AI tools sometimes add them to silence a permission error.'],
+  ['The Supabase service_role key only on a server', 'It bypasses every policy. If it was ever in your frontend, rotate it in Settings → API.'],
+  ['Storage buckets private unless they hold public files', 'Avatars can be public. Invoices, ID photos and exports should not be.'],
+  ['/.env and /.git/config return "not found"', 'Open yoursite.com/.env in a browser. If you see your keys, so can everyone else.'],
+  ['No public source maps in production', 'They hand over your original source code. Turn them off in your build settings.'],
+  ['A monthly spend limit on every AI provider', 'If an OpenAI or Anthropic key ever leaks, a limit caps the damage.'],
+  ['Basic security headers', 'Content-Security-Policy, Strict-Transport-Security and X-Content-Type-Options, set at your host.'],
+];
+
 export const waitlistWelcome = () => ({
-  subject: "You're on the LeakPatrol list",
+  subject: 'Your AI-app security checklist (10 checks)',
   text:
-    `Thanks for signing up.\n\n` +
-    `We'll send you one email when full LeakPatrol reports are ready: every fix for your app in plain English, ` +
-    `with a copy-paste prompt for Lovable, Bolt, v0, Replit, Cursor or Claude Code.\n\n` +
-    `In the meantime you can re-run the free scan any time at https://www.getleakpatrol.com\n\n` +
-    `Questions? Just reply to this email.\n\n` +
+    `Thanks for signing up. Here's the checklist we run on every AI-built app:\n\n` +
+    CHECKLIST.map(([t, d], i) => `${i + 1}. ${t}\n   ${d}`).join('\n\n') +
+    `\n\nWant it done for you in a minute? Run the free scan: https://www.getleakpatrol.com/?ref=email\n\n` +
+    `We'll also email you when full reports and automatic re-checks launch, plus the odd security tip. Questions? Just reply.\n\n` +
     `LeakPatrol\n\n` +
     `--\nYou're getting this because this address was entered on www.getleakpatrol.com. ` +
     `If that wasn't you, ignore this email and you won't hear from us again. To be removed, reply "remove".\n`,
+  html: checklistHtml(),
 });
 
-export const waitlistAlert = (email) => ({
+function checklistHtml() {
+  const font = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`;
+  const items = CHECKLIST.map(([t, d], i) =>
+    `<tr><td valign="top" width="36" style="padding:0 0 14px;"><div style="width:26px;height:26px;border-radius:13px;background:#e8ecff;color:#4c6ef5;font-size:13px;font-weight:700;line-height:26px;text-align:center;">${i + 1}</div></td>` +
+    `<td style="padding:0 0 14px;font-size:14px;line-height:1.5;color:#586079;"><strong style="color:#0f1222;">${esc(t)}</strong><br>${esc(d)}</td></tr>`).join('');
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Your AI-app security checklist</title></head>
+<body style="margin:0;padding:0;background:#f6f7fb;font-family:${font};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f7fb;"><tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+<tr><td style="background:#0d1020;border-radius:14px 14px 0 0;padding:22px 28px;color:#f1f3fa;font-size:20px;font-weight:700;">LeakPatrol</td></tr>
+<tr><td style="background:#ffffff;padding:30px 28px 10px;border-left:1px solid #e2e6f0;border-right:1px solid #e2e6f0;">
+  <h1 style="margin:0 0 8px;font-size:22px;line-height:1.3;color:#0f1222;">Your AI-app security checklist</h1>
+  <p style="margin:0 0 22px;font-size:15px;line-height:1.5;color:#586079;">The 10 things we check on every app built with Lovable, Bolt, v0, Replit or Cursor.</p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${items}</table>
+  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:10px 0 24px;"><tr>
+    <td style="background:#4c6ef5;border-radius:10px;"><a href="https://www.getleakpatrol.com/?ref=email" style="display:inline-block;padding:13px 24px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;">Run all of these in a minute, free</a></td>
+  </tr></table>
+</td></tr>
+<tr><td style="background:#ffffff;border:1px solid #e2e6f0;border-top:0;border-radius:0 0 14px 14px;padding:14px 28px 22px;">
+  <p style="margin:0;font-size:13px;line-height:1.5;color:#586079;">We'll also email you when full reports and automatic re-checks launch, plus the odd security tip. Questions? Just reply.</p>
+</td></tr>
+<tr><td style="padding:18px 28px;text-align:center;font-size:12px;line-height:1.5;color:#586079;">You're getting this because this address was entered on getleakpatrol.com. To be removed, reply "remove".</td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+export const waitlistAlert = (email, source = 'results') => ({
   subject: `New waitlist sign-up: ${email}`,
-  text: `${email} joined the LeakPatrol waitlist at ${new Date().toISOString()}.\n`,
+  text: `${email} joined the LeakPatrol waitlist at ${new Date().toISOString()} (from: ${source}).\n`,
 });
 
 // Sent to the buyer once the payment webhook arrives. The report link is the only key to a paid

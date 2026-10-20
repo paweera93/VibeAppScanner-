@@ -50,6 +50,7 @@
           <li>No sign-up</li>
           <li>Results in about a minute</li>
         </ul>
+        <p class="checklist-link"><a href="#checklist">Not ready to scan? Get the free 10-point checklist ↓</a></p>
         <p class="works-with">Works with apps from <span>Lovable</span> <span>Bolt</span> <span>v0</span> <span>Replit</span> <span>Cursor</span></p>
       </div>
 
@@ -104,14 +105,14 @@
             <p class="fine-print">One-off payment, no subscription. Secure checkout by Lemon Squeezy. Your report re-checks your site whenever you open it.</p>
           </div>
           <div id="waitlist-block">
-            <p>Full reports are coming soon. Leave your email and we'll tell you when they're ready.</p>
+            <p>Full reports are coming soon. Leave your email: we'll send you our 10-point security checklist now, and tell you when reports are ready.</p>
             <form id="waitlist-form" class="scan-form" novalidate>
               <label for="email" class="visually-hidden">Your email</label>
               <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
               <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
-              <button type="submit" id="waitlist-button">Notify me</button>
+              <button type="submit" id="waitlist-button">Send me the checklist</button>
             </form>
-            <p id="waitlist-status" class="fine-print" aria-live="polite">One email when full reports launch, nothing else. Unsubscribe any time.</p>
+            <p id="waitlist-status" class="fine-print" aria-live="polite">The checklist now, one email when reports launch, and the odd tip. Unsubscribe any time.</p>
           </div>
         </div>
       </section>
@@ -163,6 +164,21 @@
           <h3>Security headers &amp; HTTPS</h3>
           <p>The browser protections most AI-built apps are missing, with the exact lines to add for your host.</p>
         </div>
+      </div>
+    </section>
+
+    <section id="checklist" class="section wrap narrow">
+      <div class="signup-box">
+        <p class="eyebrow">Free checklist</p>
+        <h2>Not ready to scan? Get the 10-point checklist.</h2>
+        <p>The exact checks we run on every app built with Lovable, Bolt, v0, Replit or Cursor, with how to do each one yourself. Straight to your inbox.</p>
+        <form class="scan-form" data-signup data-source="home" novalidate>
+          <label for="checklist-email" class="visually-hidden">Your email</label>
+          <input id="checklist-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <input name="website" type="text" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit">Email me the checklist</button>
+        </form>
+        <p class="fine-print signup-status" aria-live="polite">Plus an email when automatic re-checks launch, and the odd tip. Unsubscribe any time.</p>
       </div>
     </section>
 
@@ -252,6 +268,7 @@
     <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
   </footer>
 
+  <script src="/signup.js" type="module"></script>
   <script src="/app.js" type="module"></script>
 </body>
 </html>

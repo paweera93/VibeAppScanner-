@@ -333,6 +333,14 @@ details p { margin: 0 0 18px; color: var(--muted); }
 #database-block textarea { width: 100%; margin-top: 8px; font: 0.85rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 #badge-code { white-space: pre-wrap; word-break: break-all; }
 
+/* Checklist sign-up */
+.signup-box { margin: 28px 0 8px; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.signup-box h2 { margin-top: 0; }
+.signup-box p { color: var(--muted); }
+.checklist-link { margin: 6px 0 0; font-size: 0.95rem; }
+.checklist-link a { color: var(--hero-accent); }
+.guide-cta .scan-form { margin-top: 12px; }
+
 /* Guides */
 .guide h3 { font-size: 1.1rem; margin-top: 26px; }
 .guide .crumbs { font-size: 0.9rem; color: var(--muted); margin: 0 0 12px; }

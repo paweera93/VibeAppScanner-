@@ -162,7 +162,7 @@ waitlistForm.addEventListener('submit', async (e) => {
     const body = await res.json();
     if (res.ok) {
       waitlistForm.hidden = true;
-      waitlistStatus.textContent = 'Thanks! Check your inbox for a confirmation. We’ll email you when full reports are ready.';
+      waitlistStatus.textContent = 'Sent! Check your inbox (and the Promotions or Updates tab) for the checklist.';
     } else {
       waitlistStatus.textContent = body.error || 'Something went wrong. Please try again.';
     }
@@ -178,4 +178,11 @@ function el(tag, props, children = []) {
   const node = Object.assign(document.createElement(tag), props);
   for (const c of children) node.append(c);
   return node;
+}
+
+// Scan boxes on the guide pages send visitors here with ?url=, so start that scan straight away.
+const preset = new URLSearchParams(location.search).get('url');
+if (preset) {
+  input.value = preset.slice(0, 300);
+  form.requestSubmit();
 }

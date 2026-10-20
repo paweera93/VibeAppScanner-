@@ -124,15 +124,17 @@ async function handleWaitlist(req, res) {
   if (!signupLimit.allow(clientIp(req))) {
     return sendJson(res, 429, { error: 'Too many sign-ups from your connection. Please try again later.' });
   }
-  const isNew = await addToWaitlist(store, email, 'results');
-  console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup', isNew }));
+  // Where the form was: 'results' after a scan, 'home', or a guide's slug.
+  const source = /^[a-z0-9-]{1,60}$/.test(String(body?.source || '')) ? body.source : 'results';
+  const isNew = await addToWaitlist(store, email, source);
+  console.log(JSON.stringify({ severity: 'INFO', event: 'waitlist_signup', isNew, source }));
   if (isNew) {
     // Sent before replying: Cloud Run may pause the container once the response is out.
     // A failed email is logged but never fails the sign-up, which is already saved.
     const cfg = emailConfig();
     const results = await Promise.allSettled([
       sendEmail(cfg, { to: email, ...waitlistWelcome() }),
-      sendEmail(cfg, { to: cfg.notify, ...waitlistAlert(email) }),
+      sendEmail(cfg, { to: cfg.notify, ...waitlistAlert(email, source) }),
     ]);
     for (const r of results) {
       if (r.status === 'rejected') console.error(JSON.stringify({ severity: 'ERROR', event: 'email_failed', message: String(r.reason?.message || r.reason) }));

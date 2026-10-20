@@ -41,7 +41,9 @@ test('a new sign-up gets a confirmation and the owner gets an alert, once', asyn
   assert.equal(sent.length, 2);
   const welcome = sent.find((m) => m.to[0] === 'maker@example.com');
   const alert = sent.find((m) => m.to[0] === 'owner@example.com');
-  assert.match(welcome.subject, /on the LeakPatrol list/);
+  assert.match(welcome.subject, /security checklist/);
+  assert.match(welcome.text, /Row Level Security on every Supabase table/);
+  assert.match(welcome.html, /Run all of these in a minute/);
   assert.match(welcome.from, /getleakpatrol\.com/);
   assert.equal(welcome.auth, 'Bearer re_test');
   assert.match(alert.subject, /maker@example\.com/);
