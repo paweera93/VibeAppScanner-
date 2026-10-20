@@ -89,7 +89,7 @@ using (auth.uid() = user_id);</code></pre>
     <details><summary>Can the service_role key be used in the browser?</summary><p>No. The service_role or sb_secret_ key bypasses all Row Level Security. Keep it on a server or in an Edge Function and rotate it if it was ever exposed.</p></details>
     <details><summary>How do I check if RLS is enabled on all my Supabase tables?</summary><p>Run select tablename, rowsecurity from pg_tables where schemaname = &#x27;public&#x27;; in the SQL editor. Any table showing false has RLS off.</p></details>
     <h2>More guides</h2>
-    <ul><li><a href="/lovable-security-check.html">Lovable security check: is your Lovable app safe?</a></li><li><a href="/exposed-api-key-check.html">How to check if your API key is exposed on your website</a></li></ul>
+    <ul><li><a href="/supabase-october-30-change.html">Supabase&#x27;s October 30 change: what it fixes for your app&#x27;s security, and what it doesn&#x27;t</a></li><li><a href="/lovable-security-check.html">Lovable security check: is your Lovable app safe?</a></li><li><a href="/exposed-api-key-check.html">How to check if your API key is exposed on your website</a></li></ul>
   </main>
   <footer class="site-footer wrap">
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>

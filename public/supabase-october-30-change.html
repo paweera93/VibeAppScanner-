@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supabase&#x27;s October 30 change: what it fixes for your app&#x27;s security, and what it doesn&#x27;t · LeakPatrol</title>
+  <meta name="description" content="From 30 October 2026, new Supabase tables are no longer exposed to the Data API automatically. Existing tables keep their access. What breaks, what stays open, and what to check before the date.">
+  <link rel="canonical" href="https://www.getleakpatrol.com/supabase-october-30-change.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="LeakPatrol">
+  <meta property="og:url" content="https://www.getleakpatrol.com/supabase-october-30-change.html">
+  <meta property="og:title" content="Supabase&#x27;s October 30 change: what it fixes for your app&#x27;s security, and what it doesn&#x27;t">
+  <meta property="og:description" content="From 30 October 2026, new Supabase tables are no longer exposed to the Data API automatically. Existing tables keep their access. What breaks, what stays open, and what to check before the date.">
+  <meta property="og:image" content="https://www.getleakpatrol.com/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Supabase's October 30 change: what it fixes, and what it doesn't", "description": "From 30 October 2026, new Supabase tables are no longer exposed to the Data API automatically. Existing tables keep their access. What breaks, what stays open, and what to check before the date.", "url": "https://www.getleakpatrol.com/supabase-october-30-change.html", "datePublished": "2026-10-20", "dateModified": "2026-10-20", "author": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/about.html"}, "publisher": {"@type": "Organization", "name": "LeakPatrol", "url": "https://www.getleakpatrol.com/", "logo": "https://www.getleakpatrol.com/logo.png"}, "image": "https://www.getleakpatrol.com/og-image.png"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "LeakPatrol", "item": "https://www.getleakpatrol.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://www.getleakpatrol.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "Supabase's October 30 change: what it fixes for your app's security, and what it doesn't", "item": "https://www.getleakpatrol.com/supabase-october-30-change.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What changes in Supabase on October 30, 2026?", "acceptedAnswer": {"@type": "Answer", "text": "New tables created in the public schema of existing projects are no longer automatically granted to the anon, authenticated and service_role roles, so they are not reachable through the Data API until you add an explicit GRANT."}}, {"@type": "Question", "name": "Does the Supabase October 30 change secure my existing tables?", "acceptedAnswer": {"@type": "Answer", "text": "No. Existing tables keep their current grants and Row Level Security behaves the same, so tables that are open today stay open. You need to check RLS and grants on existing tables yourself."}}, {"@type": "Question", "name": "Why does my new Supabase table give a permission error?", "acceptedAnswer": {"@type": "Answer", "text": "After the change, new public tables need an explicit grant, for example grant select, insert, update, delete on public.my_table to authenticated, together with Row Level Security policies."}}]}]}</script>
+  <!-- Cloudflare Web Analytics: cookie-free visit counts -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b05ba6abd84a41b8b96c1c0188500e6a"}'></script>
+</head>
+<body>
+  <div class="site-header-band">
+    <header class="site-header wrap">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26"> LeakPatrol</a>
+      <nav class="nav"><a href="/#how">How it works</a> <a href="/guides.html">Guides</a> <a href="/about.html">About</a></nav>
+    </header>
+  </div>
+  <main class="prose guide">
+    <p class="crumbs"><a href="/">LeakPatrol</a> › <a href="/guides.html">Guides</a></p>
+    <h1>Supabase&#x27;s October 30 change: what it fixes, and what it doesn&#x27;t</h1>
+    <p class="byline">By LeakPatrol · Updated 20 October 2026</p>
+
+<p class="lead-p">On 30 October 2026, Supabase changes how new tables are exposed in existing projects. It's a good security change, but it's easy to misread as "my database is now safe". It isn't: tables you already have keep exactly the access they have today.</p>
+
+<h2>What's changing</h2>
+<p>Until now, every table created in the <code>public</code> schema was automatically granted to the <code>anon</code>, <code>authenticated</code> and <code>service_role</code> roles, so the Data API (REST and GraphQL, which supabase-js uses) could read and write it straight away. Row Level Security was the only thing standing in the way.</p>
+<p>From 30 October, <strong>new</strong> tables in <code>public</code> won't get those grants automatically. You have to opt each one in with a Postgres <code>GRANT</code> before your app can reach it through the Data API. New projects have worked this way since May, and the Supabase CLI switched for local development in June.</p>
+
+<h2>What doesn't change</h2>
+<ul>
+<li><strong>Existing tables keep their grants.</strong> If a table is readable by anyone today, it still will be on 31 October.</li>
+<li><strong>Row Level Security works the same.</strong> A table with RLS off, or with a <code>using (true)</code> policy, is just as open as before.</li>
+<li><strong>Direct database connections</strong> (an ORM or server using a connection string) aren't affected.</li>
+</ul>
+<p>So the change stops <em>new</em> accidents. It doesn't fix the leaks that are already out there.</p>
+
+<h2>What might break</h2>
+<p>If your app (or your AI tool) creates new tables after 30 October through migrations or the SQL editor, those tables won't be reachable from the browser until you grant access. Expect a permission error from the Data API on a brand-new table.</p>
+<p>The fix is to grant only what the app needs, and to switch RLS on at the same time:</p>
+<pre><code>alter table public.notes enable row level security;
+
+grant select, insert, update, delete on public.notes to authenticated;
+
+create policy "Users manage their own notes"
+on public.notes for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);</code></pre>
+<p>Only grant to <code>anon</code> (logged-out visitors) if the table is meant to be public, like a product list, and then usually just <code>select</code>.</p>
+<p><strong>Watch out for AI tools "fixing" the error the wrong way.</strong> If you paste a permission error into Lovable, Bolt or Cursor, check it doesn't respond by granting everything to <code>anon</code> or turning RLS off. That would recreate exactly the problem this change is meant to prevent.</p>
+
+<h2>What to check before 30 October</h2>
+<p>Because existing tables keep their access, this is a good moment to audit them. In the SQL editor:</p>
+<p><strong>1. Which tables have RLS off:</strong></p>
+<pre><code>select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public';</code></pre>
+<p><strong>2. What logged-out visitors are allowed to do:</strong></p>
+<pre><code>select table_name, string_agg(privilege_type, ', ') as privileges
+from information_schema.role_table_grants
+where grantee = 'anon' and table_schema = 'public'
+group by table_name;</code></pre>
+<p>Any table that appears in the second list with RLS off in the first is readable (and often writable) by anyone who has your anon key, which is in your app's JavaScript.</p>
+<p><strong>3. Policies that let everyone through:</strong> look for <code>using (true)</code> in Authentication &rarr; Policies.</p>
+<p>LeakPatrol's free scan checks your live app from the outside for leaked keys, public files and missing protections. The full report adds a Supabase check that reads your table, policy, view and storage settings from a query you run yourself, so we never need access to your project.</p>
+
+    <div class="guide-cta">
+      <h2>Check your app in a minute</h2>
+      <p>Free, read-only, no sign-up. Every problem comes with a plain-English fix and a prompt for your AI tool.</p>
+      <a class="button" href="/">Scan your app free</a>
+    </div>
+
+    <h2>Questions</h2>
+    <details><summary>What changes in Supabase on October 30, 2026?</summary><p>New tables created in the public schema of existing projects are no longer automatically granted to the anon, authenticated and service_role roles, so they are not reachable through the Data API until you add an explicit GRANT.</p></details>
+    <details><summary>Does the Supabase October 30 change secure my existing tables?</summary><p>No. Existing tables keep their current grants and Row Level Security behaves the same, so tables that are open today stay open. You need to check RLS and grants on existing tables yourself.</p></details>
+    <details><summary>Why does my new Supabase table give a permission error?</summary><p>After the change, new public tables need an explicit grant, for example grant select, insert, update, delete on public.my_table to authenticated, together with Row Level Security policies.</p></details>
+    <h2>More guides</h2>
+    <ul><li><a href="/lovable-security-check.html">Lovable security check: is your Lovable app safe?</a></li><li><a href="/supabase-security-check.html">Supabase security check: is your anon key safe? (RLS checker)</a></li><li><a href="/exposed-api-key-check.html">How to check if your API key is exposed on your website</a></li></ul>
+  </main>
+  <footer class="site-footer wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
+    <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
+  </footer>
+</body>
+</html>

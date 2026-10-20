@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1000px;height:420px;overflow:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",sans-serif;color:#f1f3fa;
+background:radial-gradient(700px 420px at 92% 0%,rgba(76,98,200,.42),transparent 62%),radial-gradient(520px 340px at 0% 100%,rgba(120,40,80,.26),transparent 60%),#0d1020;
+display:grid;grid-template-columns:1fr 380px;gap:36px;align-items:center;padding:0 48px 0 56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750;font-size:20px;margin-bottom:20px}
+.brand img{width:32px;height:32px;border-radius:8px}
+h1{font-size:44px;line-height:1.08;font-weight:800;letter-spacing:-.03em}
+h1 span{color:#8197ff}
+p{margin-top:14px;font-size:18px;color:#a3abc4;line-height:1.4}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);transform:rotate(1.2deg)}
+ul{list-style:none;padding:0;display:grid;gap:8px}
+li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:14px}
+li.bad{background:rgba(255,107,139,.12);border:1px solid rgba(255,107,139,.35)}
+.tag{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:12px;font-weight:750;padding:2px 8px;border-radius:6px;border:1px solid currentColor;white-space:nowrap}
+.ok{color:#51cf66}.no{color:#ff6b8b}
+</style></head><body>
+<div>
+  <div class="brand"><img src="../../public/logo.png" alt="">LeakPatrol</div>
+  <h1>Supabase changes on <span>30 Oct.</span><br>Your old tables don&#39;t.</h1>
+  <p>What the new default fixes, what stays open, and what to check first.</p>
+</div>
+<div class="card">
+  <ul>
+    <li><span>new tables</span><span class="tag ok">Locked by default</span></li>
+    <li class="bad"><span>existing tables</span><span class="tag no">Unchanged</span></li>
+    <li class="bad"><span>RLS off</span><span class="tag no">Still open</span></li>
+    <li class="bad"><span>using (true)</span><span class="tag no">Still open</span></li>
+    <li><span>RLS + grants</span><span class="tag ok">Safe</span></li>
+  </ul>
+</div>
+</body></html>

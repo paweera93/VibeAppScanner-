@@ -16,6 +16,61 @@ TODAY = date.today().isoformat()
 
 GUIDES = [
     {
+        'slug': 'supabase-october-30-change',
+        'title': "Supabase's October 30 change: what it fixes for your app's security, and what it doesn't",
+        'description': 'From 30 October 2026, new Supabase tables are no longer exposed to the Data API automatically. Existing tables keep their access. What breaks, what stays open, and what to check before the date.',
+        'h1': "Supabase's October 30 change: what it fixes, and what it doesn't",
+        'body': """
+<p class="lead-p">On 30 October 2026, Supabase changes how new tables are exposed in existing projects. It's a good security change, but it's easy to misread as "my database is now safe". It isn't: tables you already have keep exactly the access they have today.</p>
+
+<h2>What's changing</h2>
+<p>Until now, every table created in the <code>public</code> schema was automatically granted to the <code>anon</code>, <code>authenticated</code> and <code>service_role</code> roles, so the Data API (REST and GraphQL, which supabase-js uses) could read and write it straight away. Row Level Security was the only thing standing in the way.</p>
+<p>From 30 October, <strong>new</strong> tables in <code>public</code> won't get those grants automatically. You have to opt each one in with a Postgres <code>GRANT</code> before your app can reach it through the Data API. New projects have worked this way since May, and the Supabase CLI switched for local development in June.</p>
+
+<h2>What doesn't change</h2>
+<ul>
+<li><strong>Existing tables keep their grants.</strong> If a table is readable by anyone today, it still will be on 31 October.</li>
+<li><strong>Row Level Security works the same.</strong> A table with RLS off, or with a <code>using (true)</code> policy, is just as open as before.</li>
+<li><strong>Direct database connections</strong> (an ORM or server using a connection string) aren't affected.</li>
+</ul>
+<p>So the change stops <em>new</em> accidents. It doesn't fix the leaks that are already out there.</p>
+
+<h2>What might break</h2>
+<p>If your app (or your AI tool) creates new tables after 30 October through migrations or the SQL editor, those tables won't be reachable from the browser until you grant access. Expect a permission error from the Data API on a brand-new table.</p>
+<p>The fix is to grant only what the app needs, and to switch RLS on at the same time:</p>
+<pre><code>alter table public.notes enable row level security;
+
+grant select, insert, update, delete on public.notes to authenticated;
+
+create policy "Users manage their own notes"
+on public.notes for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);</code></pre>
+<p>Only grant to <code>anon</code> (logged-out visitors) if the table is meant to be public, like a product list, and then usually just <code>select</code>.</p>
+<p><strong>Watch out for AI tools "fixing" the error the wrong way.</strong> If you paste a permission error into Lovable, Bolt or Cursor, check it doesn't respond by granting everything to <code>anon</code> or turning RLS off. That would recreate exactly the problem this change is meant to prevent.</p>
+
+<h2>What to check before 30 October</h2>
+<p>Because existing tables keep their access, this is a good moment to audit them. In the SQL editor:</p>
+<p><strong>1. Which tables have RLS off:</strong></p>
+<pre><code>select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public';</code></pre>
+<p><strong>2. What logged-out visitors are allowed to do:</strong></p>
+<pre><code>select table_name, string_agg(privilege_type, ', ') as privileges
+from information_schema.role_table_grants
+where grantee = 'anon' and table_schema = 'public'
+group by table_name;</code></pre>
+<p>Any table that appears in the second list with RLS off in the first is readable (and often writable) by anyone who has your anon key, which is in your app's JavaScript.</p>
+<p><strong>3. Policies that let everyone through:</strong> look for <code>using (true)</code> in Authentication &rarr; Policies.</p>
+<p>LeakPatrol's free scan checks your live app from the outside for leaked keys, public files and missing protections. The full report adds a Supabase check that reads your table, policy, view and storage settings from a query you run yourself, so we never need access to your project.</p>
+""",
+        'faq': [
+            ('What changes in Supabase on October 30, 2026?', 'New tables created in the public schema of existing projects are no longer automatically granted to the anon, authenticated and service_role roles, so they are not reachable through the Data API until you add an explicit GRANT.'),
+            ('Does the Supabase October 30 change secure my existing tables?', 'No. Existing tables keep their current grants and Row Level Security behaves the same, so tables that are open today stay open. You need to check RLS and grants on existing tables yourself.'),
+            ('Why does my new Supabase table give a permission error?', 'After the change, new public tables need an explicit grant, for example grant select, insert, update, delete on public.my_table to authenticated, together with Row Level Security policies.'),
+        ],
+    },
+    {
         'slug': 'lovable-security-check',
         'title': 'Lovable security check: is your Lovable app safe?',
         'description': 'Free security check for Lovable apps. Find leaked API keys, Supabase tables without Row Level Security, and missing protections, with fixes you can paste back into Lovable.',
