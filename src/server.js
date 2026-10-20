@@ -330,7 +330,10 @@ async function serveStatic(url, req, res) {
   if (!file.startsWith(PUBLIC_DIR)) return send(res, 404, 'Not found', 'text/plain');
   try {
     const data = await readFile(file);
-    return send(res, 200, data, TYPES[extname(file)] || 'application/octet-stream');
+    // Pages, scripts and styles change with each deploy, so browsers must check for a new copy;
+    // images rarely change and can be kept for a day.
+    const cache = /\.(png|svg)$/.test(file) ? 'public, max-age=86400' : 'no-cache';
+    return send(res, 200, data, TYPES[extname(file)] || 'application/octet-stream', { 'cache-control': cache });
   } catch {
     const data = await readFile(join(PUBLIC_DIR, '404.html')).catch(() => 'Not found');
     return send(res, 404, data, 'text/html; charset=utf-8');
