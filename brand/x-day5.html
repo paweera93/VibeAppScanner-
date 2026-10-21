@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1200px;height:675px;overflow:hidden}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Helvetica Neue",sans-serif;color:#f1f3fa;
+background:radial-gradient(800px 500px at 90% 0%,rgba(76,98,200,.4),transparent 62%),radial-gradient(600px 400px at 0% 100%,rgba(120,40,80,.26),transparent 60%),#0d1020;
+display:grid;grid-template-columns:1fr 560px;gap:48px;align-items:center;padding:0 64px 0 72px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:26px;margin-bottom:28px}
+.brand img{width:40px;height:40px;border-radius:9px}
+h1{font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-.035em}
+h1 span{color:#8197ff}
+p.sub{margin-top:20px;font-size:22px;color:#a3abc4;line-height:1.45}
+.win{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.45);transform:rotate(1.2deg);overflow:hidden}
+.bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(0,0,0,.3)}
+.dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.18)}
+.addr{flex:1;margin-left:8px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:16px;background:rgba(255,255,255,.08);border-radius:8px;padding:7px 12px;color:#f1f3fa}
+pre{margin:0;padding:20px 22px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:17px;line-height:1.7;color:#a3abc4}
+.k{color:#fcc419}.v{color:#ff6b8b}
+.verdict{margin:0 18px 18px;padding:10px 14px;border-radius:10px;background:rgba(255,107,139,.12);border:1px solid rgba(255,107,139,.35);color:#ff6b8b;font-weight:700;font-size:16px}
+</style></head><body>
+<div>
+  <div class="brand"><img src="../public/logo.png" alt="">LeakPatrol</div>
+  <h1>Open <span>yoursite.com/.env</span> right now.</h1>
+  <p class="sub">If you see this instead of a 404 page, so can everyone else. Delete it, block /.env at your host, rotate every key.</p>
+</div>
+<div class="win">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr">my-app.com/.env</span></div>
+<pre><span class="k">SUPABASE_SERVICE_ROLE_KEY</span>=<span class="v">eyJhbGciOi…</span>
+<span class="k">OPENAI_API_KEY</span>=<span class="v">sk-proj-4f…</span>
+<span class="k">STRIPE_SECRET_KEY</span>=<span class="v">sk_live_51…</span>
+<span class="k">DATABASE_URL</span>=<span class="v">postgres://…</span></pre>
+  <div class="verdict">Public. Every key here is now compromised.</div>
+</div>
+</body></html>
