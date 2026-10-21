@@ -16,6 +16,72 @@ TODAY = date.today().isoformat()
 
 GUIDES = [
     {
+        'slug': 'supabase-rls-policy-generator',
+        'title': 'Supabase RLS policy generator (free)',
+        'description': 'Free Supabase Row Level Security policy generator. Pick who should see and change each table and get copy-paste SQL with the right grants for the 30 October 2026 change, plus a prompt for Lovable, Bolt or Cursor.',
+        'h1': 'Supabase RLS policy generator',
+        'scripts': ['rls-generator.js'],
+        'body': """
+<p class="lead-p">Pick a table and who should be able to see and change its rows. You get SQL to paste into the Supabase SQL editor, with Row Level Security policies and the grants that tables created after 30 October 2026 need. Everything runs in your browser; nothing is sent to us.</p>
+
+<form id="rls-form" class="rls-form" novalidate>
+  <label for="rls-table">Table name</label>
+  <input id="rls-table" name="table" type="text" value="notes" autocomplete="off" spellcheck="false">
+
+  <fieldset>
+    <legend>Who can see and change the rows?</legend>
+    <label><input type="radio" name="pattern" value="own" checked> Each user reads and changes only their own rows <span>(notes, orders, profiles)</span></label>
+    <label><input type="radio" name="pattern" value="public-read"> Anyone can read, only the owner can change <span>(published posts, listings)</span></label>
+    <label><input type="radio" name="pattern" value="submit-only"> Anyone can submit, nobody can read <span>(contact form, waitlist)</span></label>
+    <label><input type="radio" name="pattern" value="team"> Members of the same team share rows <span>(workspaces, organisations)</span></label>
+    <label><input type="radio" name="pattern" value="members-read"> Logged-in users can read, nobody can change from the app <span>(course content)</span></label>
+    <label><input type="radio" name="pattern" value="server-only"> Only my server or Edge Functions <span>(payments, admin data)</span></label>
+  </fieldset>
+
+  <div id="rls-owner-field">
+    <label for="rls-owner">Column that holds the owner's user id</label>
+    <input id="rls-owner" name="owner" type="text" value="user_id" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="rls-team-fields" hidden>
+    <label for="rls-team">Column that holds the team id</label>
+    <input id="rls-team" name="team" type="text" value="team_id" autocomplete="off" spellcheck="false">
+    <label for="rls-members">Membership table (with user_id and the team column)</label>
+    <input id="rls-members" name="members" type="text" value="team_members" autocomplete="off" spellcheck="false">
+  </div>
+  <p id="rls-error" class="rls-error" aria-live="polite"></p>
+</form>
+
+<div id="rls-output" class="rls-output">
+  <h2>Your SQL</h2>
+  <pre><code id="rls-sql"></code></pre>
+  <p class="rls-actions"><button type="button" class="copy" data-copy="sql">Copy SQL</button> <button type="button" class="copy" data-copy="prompt">Copy as a prompt for Lovable, Bolt or Cursor</button></p>
+  <h3>What this does</h3>
+  <ul id="rls-explain"></ul>
+</div>
+
+<h2>How to use it</h2>
+<ol>
+<li>Open your project in Supabase, then <strong>SQL Editor</strong> → <strong>New query</strong>.</li>
+<li>Paste the SQL and click <strong>Run</strong>. Do one table at a time.</li>
+<li>Check <strong>Authentication → Policies</strong> for older policies on the same table and delete any you don't want. Policies add up, so an old <code>using (true)</code> policy still lets everyone in.</li>
+<li>Test it: log out of your app and check the data is gone, then log in as a second user and check you can't see the first user's rows.</li>
+</ol>
+<p>If your app was built with Lovable, Bolt or Cursor, you can copy the prompt version instead. It tells the AI not to "fix" any error by switching RLS off, which is the most common way these settings get undone.</p>
+
+<h2>Why the grants are there</h2>
+<p>From 30 October 2026, new tables in existing Supabase projects are no longer opened to the Data API automatically: they need a <code>grant</code> before your app can reach them. The SQL above grants only what each pattern needs, and removes access for logged-out visitors (<code>anon</code>) wherever they shouldn't have it. Tables you created before the change keep their old grants, so running this on them tightens access too. <a href="/supabase-october-30-change.html">More on the 30 October change</a>.</p>
+
+<h2>Check your live app too</h2>
+<p>Policies protect your tables, but leaks also come from elsewhere: a service_role key in the frontend, a public storage bucket, or a <code>.env</code> file your host serves. LeakPatrol's free scan checks your live app from the outside in about a minute.</p>
+""",
+        'faq': [
+            ('How do I write a Supabase RLS policy so users only see their own rows?', 'Enable row level security on the table, then create policies for select, insert, update and delete that compare the owner column with (select auth.uid()), for example using ((select auth.uid()) = user_id). Add with check on insert and update so users cannot create or move rows to someone else.'),
+            ('Why use (select auth.uid()) instead of auth.uid() in policies?', 'Wrapping auth.uid() in a select lets Postgres evaluate it once per query instead of once per row, which Supabase recommends for performance on larger tables. The result is the same.'),
+            ('How do I let anyone submit a form but not read the submissions in Supabase?', 'Enable RLS, grant only insert to anon and authenticated, and add an insert policy with check (true) and no select policy. In the app, insert without chaining .select(), because reading the row back is not allowed.'),
+            ('Do I need GRANT statements as well as RLS policies in Supabase?', 'For tables created after 30 October 2026 in existing projects, yes: new tables are not granted to anon and authenticated automatically, so the Data API cannot reach them until you grant access. RLS policies then decide which rows each user can see.'),
+        ],
+    },
+    {
         'slug': 'supabase-october-30-change',
         'title': "Supabase's October 30 change: what it fixes for your app's security, and what it doesn't",
         'description': 'From 30 October 2026, new Supabase tables are no longer exposed to the Data API automatically. Existing tables keep their access. What breaks, what stays open, and what to check before the date.',
@@ -287,7 +353,7 @@ FOOTER = """
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="20" height="20"> LeakPatrol</a>
     <nav><a href="/guides.html">Guides</a> <a href="/about.html">About</a> <a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a> <a href="mailto:hello@getleakpatrol.com">Contact</a></nav>
   </footer>
-  <script src="/signup.js" type="module"></script>
+  <script src="/signup.js" type="module"></script>{scripts}
 </body>
 </html>
 """
@@ -319,7 +385,8 @@ def build_guide(g):
     page = HEADER.format(title=esc(g['title']), description=esc(g['description']), url=url, h1=esc(g['h1']),
                          updated=date.today().strftime('%-d %B %Y'),
                          jsonld=json.dumps(jsonld, ensure_ascii=False).replace('</', '<\\/'))
-    page += g['body'] + FOOTER.format(faq=faq_html, more=more, slug=g['slug'])
+    scripts = ''.join(f'\n  <script src="/{name}" type="module"></script>' for name in g.get('scripts', []))
+    page += g['body'] + FOOTER.format(faq=faq_html, more=more, slug=g['slug'], scripts=scripts)
     (PUBLIC / f"{g['slug']}.html").write_text(page)
 
 

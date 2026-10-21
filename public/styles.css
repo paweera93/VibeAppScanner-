@@ -388,3 +388,15 @@ details p { margin: 0 0 18px; color: var(--muted); }
   html { scroll-behavior: auto; }
   * { transition: none !important; animation-duration: 0s !important; }
 }
+
+/* RLS policy generator */
+.rls-form { display: grid; gap: 10px; margin: 24px 0; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.rls-form > label, .rls-form #rls-owner-field label, .rls-form #rls-team-fields label { font-weight: 600; color: var(--text); }
+.rls-form input[type=text] { width: 100%; max-width: 360px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-family: ui-monospace, "SF Mono", Menlo, monospace; background: var(--surface, #fff); color: var(--text); }
+.rls-form fieldset { border: 0; padding: 0; margin: 8px 0; display: grid; gap: 8px; }
+.rls-form legend { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.rls-form fieldset label { display: flex; gap: 8px; align-items: baseline; color: var(--text); cursor: pointer; }
+.rls-form fieldset span { color: var(--muted); font-size: 0.9rem; }
+.rls-form #rls-owner-field, .rls-form #rls-team-fields { display: grid; gap: 8px; }
+.rls-error { color: #d6336c; margin: 0; min-height: 1em; }
+.rls-actions { display: flex; flex-wrap: wrap; gap: 10px; }
