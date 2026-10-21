@@ -13,7 +13,7 @@ landing page with a sign-up box or a free version, before building the whole thi
 | # | Idea | Pain | Fit | Effort | Next cheap test |
 |---|---|---|---|---|---|
 | 1 | Ship-ready check | 3 | 5 | 5 | Add 5 launch checks to the free scan and see whether people use them |
-| 2 | Free Supabase RLS policy generator | 4 | 5 | 4 | One free page; good for SEO and sign-ups |
+| 2 | Free Supabase RLS policy generator | 4 | 5 | 4 | **Built 2026-10-21**: /supabase-rls-policy-generator.html. Watch visits and sign-ups from `guide-supabase-rls-policy-generator` |
 | 3 | AI spend guard | 4 | 3 | 3 | Landing page + sign-up count |
 | 4 | Fewer wasted Lovable credits | 4 | 3 | 4 | Free "one bug, one prompt" page |
 | 5 | "Where your customers talk" finder | 4 | 2 | 3 | Try it on LeakPatrol first |

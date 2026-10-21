@@ -36,7 +36,9 @@ group by table_name;
 
 Any table in the second list with RLS off in the first is open to anyone with your anon key (which is in your frontend).
 
-I wrote up the details, including the grant + policy pattern for new tables, here: https://www.getleakpatrol.com/supabase-october-30-change.html?ref=reddit
+I wrote up the details here: https://www.getleakpatrol.com/supabase-october-30-change.html?ref=reddit
+
+I also made a free generator that writes the grants + RLS policies for the common cases (own rows, public read, form submissions, teams), with a prompt version for Lovable/Cursor that tells it not to "fix" errors by turning RLS off: https://www.getleakpatrol.com/supabase-rls-policy-generator.html?ref=reddit
 
 Happy to answer questions on edge cases (views, SECURITY DEFINER functions, storage).
 
